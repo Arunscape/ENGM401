@@ -1,0 +1,96 @@
+#+TITLE: ENGM 401 Notes
+#+AUTHOR: Arun Woosaree
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+
+<2021-01-11 Mon>
+* Introduction
+Chapter based study questions: use right side of brain
+i.e. use common sense not exact numerical answers
+answer using experience and your understanding of the concept
+Some business problems have no clear answer unlike other engineering courses.
+**  Chapter 1
+capital expenditures: spending on behalf of the company
+
+marketing
+selling: know technical features and economic benefits
+
+operations management: know enough for day-to-day management of the business
+
+project management: proposals and justification
+
+*** types of businesses
+- Proprietorship: a business owned by one individual (small to medium size)
+- Partnership: a business with more than one owner (small to medium size)
+- Corporation: a legal entity created under provincial or federal law, entity is separate from its owners and managers (medium to large size, typically large)
+
+the engineer must estimate or forecast
+1. The required investment in a project
+2. The product demand
+3. A selling price
+4. A manufacturing cost
+5. A product life
+
+- Principle 1: A nearby penny is worth a distant dollar
+  time value of money
+- Principle 2: All that counts are the differences among alternatives <<principle2>>
+  - choices
+- Principle 3: Marginal revenue must exceed marginal cost
+  - \(\delta R > \delta C\)
+- Principle 4:  Additional risk is not taken without the expected additional return
+
+summary: we did the course overview
+and basic principles of engineering economics
+
+* Chapter 3
+<2021-01-13 Wed>
+**** Story: Take a lump sum of $17 Million, or $1 Million Instalments for 25 years?
+***** "A nearby penny is worth a distant dollar" [[principle2]]
+we need to compare the value of money recieved at different points in time
+
+we use interest formulas to
+*place different cash flows recieved at different times in the same time frame*
+to compare them
+** Definitions
+- Market Interest Rate ::
+    the interest rate quoted by financial institutions that refers to the cost of money to borrowrs, or the earnings from money to lenders
+- Time Value of money ::
+  - money has a *time value* because [[principle2]]
+  - Money has both *earning power* and *purchasing power*
+  (e.g. loss of value because of inflation)
+- Principal ::
+    the initial amouint of money involving debt or investments
+- Interest rate ::
+    the cost or price of the money expressed as a percentage rate per period of time
+- Interest period ::
+    a length of time that determines how frequently interest is calculated
+- Number of interest periods ::
+    specified length of time of the transaction
+- Plan for receipts or Payments ::
+    yields a particiular cash flow pattern over a specified length of time
+- Future amount of money ::
+    how much is paid over time, principal + interest
+- \(A_n\) ::
+    a discrete payment
+- i ::
+    interest rate per period
+- N ::
+    number of cash flows
+- P ::
+    sum of money at time=0 (present value/worth)
+- F ::
+    future value/future sum of money at the end of analysis
+- A ::
+    end of period payment (uniform series). This is a special case where \(A_1=A_2=...=A_N\)
+- V_m ::
+    equivalent sum of money at the end of a period n that considers the time value of money
+  + \(V_0 = P\)
+  + \(V_N = F\)
+- Cash flow diagram ::
+    + Upward is positive cash flow
+    + TODO: insert pic from slide, 4-15
+- End-of-period Convention ::
+    We place all cash flow transactions at the end of an interest period
+- Simple Interest ::
+  \(F = P + I = P(1 + iN)\)
+- Compound interest ::
+  \(F=P(1 + i)^N\)
