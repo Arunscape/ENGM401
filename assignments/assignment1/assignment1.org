@@ -1,0 +1,53 @@
+#+TITLE: Assignment1
+
+* Question 1
+#+begin_src R :results output org
+5025 * 1.0349^7
+2782 * 1.0489^3
+8312 * 1.0551^3
+#+end_src
+
+#+RESULTS:
+#+begin_src org
+[1] 6388.881
+[1] 3210.402
+[1] 9763.07
+#+end_src
+
+* Q2
+#+begin_src R :results output org :noweb yes :exports both
+present_value <- function(future_value, i, n) (future_value / (1 + i)^n)
+present_value(4501, 0.0548, 15)
+present_value(8021, 0.1138, 13)
+present_value(31640, 0.0798, 19)
+#+end_src
+
+#+RESULTS:
+#+begin_src org
+[1] 2021.888
+[1] 1975.763
+[1] 7357.213
+#+end_src
+* Q3
+#+begin_src R :results output.org
+10083/ 1.1396^9
+#+end_src
+
+#+RESULTS:
+: 3110.41116434221
+
+#+begin_src R :results output.org
+25973 * 1.1396^8
+#+end_src
+
+#+RESULTS:
+: 73882.5097986949
+
+* Q4
+#+begin_src R :results output.org :noweb yes
+f <- function(x)(26597*0.1/(1.1^x - 1) - 1059)
+uniroot(f, lower=0, upper=100)$root
+#+end_src
+
+#+RESULTS:
+: 13.1785413087354
