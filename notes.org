@@ -1,6 +1,7 @@
 #+TITLE: ENGM 401 Notes
 #+AUTHOR: Arun Woosaree
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+LaTeX_HEADER: \usepackage{graphicx}
 
 <2021-01-11 Mon>
 * Introduction
@@ -30,67 +31,113 @@ the engineer must estimate or forecast
 4. A manufacturing cost
 5. A product life
 
-- Principle 1: A nearby penny is worth a distant dollar
-  time value of money
-- Principle 2: All that counts are the differences among alternatives <<principle2>>
-  - choices
-- Principle 3: Marginal revenue must exceed marginal cost
-  - \(\delta R > \delta C\)
-- Principle 4:  Additional risk is not taken without the expected additional return
+6. Principle 1: A nearby penny is worth a distant dollar
+   (time value of money)
+7. Principle 2: All that counts are the <<<differences among alternatives>>>
+   - choices
+8. Principle 3: Marginal revenue must exceed marginal cost
+   - \(\delta R > \delta C\)
+9. Principle 4:  Additional risk is not taken without the expected additional return
 
 summary: we did the course overview
 and basic principles of engineering economics
 
 * Chapter 3
-<2021-01-13 Wed>
-**** Story: Take a lump sum of $17 Million, or $1 Million Instalments for 25 years?
-***** "A nearby penny is worth a distant dollar" [[principle2]]
-we need to compare the value of money recieved at different points in time
+    <2021-01-13 Wed>
+** Story: Take a lump sum of $17 Million, or $1 Million Instalments for 25 years?
+
+"A nearby penny is worth a distant dollar" time value of money
+we need to compare the value of money received at different points in time
 
 we use interest formulas to
-*place different cash flows recieved at different times in the same time frame*
+*place different cash flows received at different times in the same time frame*
 to compare them
 ** Definitions
 - Market Interest Rate ::
-    the interest rate quoted by financial institutions that refers to the cost of money to borrowrs, or the earnings from money to lenders
-- Time Value of money ::
-  - money has a *time value* because [[principle2]]
-  - Money has both *earning power* and *purchasing power*
-  (e.g. loss of value because of inflation)
-- Principal ::
-    the initial amouint of money involving debt or investments
-- Interest rate ::
+    the interest rate quoted by financial institutions that refers to the cost of money to borrows, or the earnings from money to lenders
+- <<<Time Value of money>>> ::
+  - a dollar today is worth more than a dollar in the future because the dollar today can earn interest
+  - money has both *earning power* and *purchasing power*
+    + earning power :: it can earn more money over time
+    + purchasing power :: loss of value because of inflation over time
+
+    (e.g. loss of value because of inflation)
+- <<<Principal>>> ::
+    the initial amount of money involving debt or investments
+- <<<Interest rate>>> ::
     the cost or price of the money expressed as a percentage rate per period of time
-- Interest period ::
+- <<<Interest period>>> ::
     a length of time that determines how frequently interest is calculated
 - Number of interest periods ::
-    specified length of time of the transaction
-- Plan for receipts or Payments ::
-    yields a particiular cash flow pattern over a specified length of time
-- Future amount of money ::
+    specified length of time of the transaction, denoted as *N*
+- <<<Plan for receipts or Payments>>> ::
+    yields a particular cash flow pattern over a specified length of time
+- <<<Future amount of money>>> ::
     how much is paid over time, principal + interest
-- \(A_n\) ::
-    a discrete payment
-- i ::
-    interest rate per period
-- N ::
-    number of cash flows
-- P ::
+- A_n :: a discrete payment or receipt occurring at the end of some interest period
+- i :: interest rate per period
+- N :: number of cash flows
+- P :: Principal amount, or the
     sum of money at time=0 (present value/worth)
-- F ::
-    future value/future sum of money at the end of analysis
-- A ::
-    end of period payment (uniform series). This is a special case where \(A_1=A_2=...=A_N\)
-- V_m ::
-    equivalent sum of money at the end of a period n that considers the time value of money
+- F :: Future value/future sum of money at the end of analysis
+- A :: end of period payment (uniform series) that continues for N periods.
+    This is a special case where \(A_1=A_2=...=A_N\)
+- V_n :: equivalent sum of money at the end of a period n that considers the time value of money
   + \(V_0 = P\)
   + \(V_N = F\)
 - Cash flow diagram ::
-    + Upward is positive cash flow
-    + TODO: insert pic from slide, 4-15
+  + Upward is positive cash flow
+    #+begin_src sh :cache yes
+    convert 'notes/lecture/markup/2021a L2 Time Value of Money SimpleCompoundInterest (with notes).pdf[14]' converted_images/cash_flow_diagram.jpg
+    #+end_src
+
+[[./converted_images/cash_flow_diagram.jpg]]
+
 - End-of-period Convention ::
     We place all cash flow transactions at the end of an interest period
-- Simple Interest ::
+- Simple Interest :: charging an interest rate only on the principal
   \(F = P + I = P(1 + iN)\)
-- Compound interest ::
+- <<<Compound interest>>> :: charging interest on the initial sum and any previously accumulated unpaid interest
   \(F=P(1 + i)^N\)
+
+** Examples
+*** Interest Transaction
+- Plan 1
+  + Principal: $20 000
+  + Loan origination fee: $200
+  + Interest rate: 9%
+  + Interest period: 1 year
+  + Number of interest periods: 5
+  + Fee payment now plus equal annual payments
+- Plan 2
+  + Principal: $20 000
+  + Loan origination fee: $200
+  + Interest rate: 9%
+  + Interest period: 1 year
+  + Number of interest periods: 5
+  + Fee payment now plus a single payment in year 5
+
+| End of Year | Receipts |   Plan 1 |    Plan 2 |
+|-------------+----------+----------+-----------|
+|           0 |    20000 |      200 |       200 |
+|           1 |          |  5141.85 |         0 |
+|           2 |          |  5141.85 |         0 |
+|           3 |          |  5141.85 |         0 |
+|           4 |          |  5141.85 |         0 |
+|           5 |          |  5141.85 | 30772.479 |
+|       total |          | 25909.25 | 30972.479 |
+#+TBLFM: $4=20000*1.09^5
+
+- plan 1 is time value of money
+  #+begin_src R :results output text
+  library(optiRum)
+  #PMT(rate, n, p)
+  PMT(0.09, 5, 20000)
+  #output : [1] -5141.85
+  #+end_src
+
+  #+RESULTS:
+  : [1] -5141.85
+
+- plan 2 is compound interest
+    \(20000*1.09^5\)
