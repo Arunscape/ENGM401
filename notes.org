@@ -19,6 +19,8 @@ def fv_simple(P, i, N):
 def fv_compound(P, i, N):
     return P * (1 + i)**N
 
+def pv_compound(fv, i, N):
+    return fv/(1 + i)**N
 #+end_src
 
 #+RESULTS: imports
@@ -68,57 +70,64 @@ we use interest formulas to
 *place different cash flows received at different times in the same time frame*
 to compare them
 ** Definitions
-- Market Interest Rate ::
++ Market Interest Rate ::
     the interest rate quoted by financial institutions that refers to the cost of money to borrows, or the earnings from money to lenders
-- <<<Time Value of money>>> ::
++ <<<Time Value of money>>> ::
   - a dollar today is worth more than a dollar in the future because the dollar today can earn interest
   - money has both *earning power* and *purchasing power*
     + earning power :: it can earn more money over time
     + purchasing power :: loss of value because of inflation over time
 
     (e.g. loss of value because of inflation)
-- <<<Principal>>> ::
++ <<<Principal>>> ::
     the initial amount of money involving debt or investments
-- <<<Interest rate>>> ::
++ <<<Interest rate>>> ::
     the cost or price of the money expressed as a percentage rate per period of time
-- <<<Interest period>>> ::
++ <<<Interest period>>> ::
     a length of time that determines how frequently interest is calculated
-- Number of interest periods ::
++ Number of interest periods ::
     specified length of time of the transaction, denoted as *N*
-- <<<Plan for receipts or Payments>>> ::
++ <<<Plan for receipts or Payments>>> ::
     yields a particular cash flow pattern over a specified length of time
-- <<<Future amount of money>>> ::
++ <<<Future amount of money>>> ::
     how much is paid over time, principal + interest
-- A_n :: a discrete payment or receipt occurring at the end of some interest period
-- i :: interest rate per period
-- N :: number of cash flows
-- P :: Principal amount, or the
++ A_n :: a discrete payment or receipt occurring at the end of some interest period
++ i :: interest rate per period
++ N :: number of cash flows
++ P :: Principal amount, or the
     sum of money at time=0 (present value/worth)
-- F :: Future value/future sum of money at the end of analysis
-- A :: end of period payment (uniform series) that continues for N periods.
++ F :: Future value/future sum of money at the end of analysis
++ A :: end of period payment (uniform series) that continues for N periods.
     This is a special case where \(A_1=A_2=...=A_N\)
-- V_n :: equivalent sum of money at the end of a period n that considers the time value of money
++ V_n :: equivalent sum of money at the end of a period n that considers the time value of money
   + \(V_0 = P\)
   + \(V_N = F\)
-- Cash flow diagram ::
++ Cash flow diagram ::
   + Upward is positive cash flow
-    #+begin_src sh :cache yes :exports none
-    convert 'notes/lecture/markup/2021a L2 Time Value of Money SimpleCompoundInterest (with notes).pdf[14]' converted_images/cash_flow_diagram.jpg
+    #+begin_src sh :cache yes :exports none :results silent
+    pdftoppm 'notes/lecture/markup/2021a L2 Time Value of Money SimpleCompoundInterest (with notes).pdf' converted_images/cash_flow_diagram -jpeg -f 15 -singlefile
     #+end_src
 
-    #+RESULTS[d64ebe72b99af4dc8b49547fee535137cebc92f0]:
+    #+attr_org: :width 256
+    [[./converted_images/cash_flow_diagram.jpg]]
 
-[[./converted_images/cash_flow_diagram.jpg]]
-
-- End-of-period Convention ::
++ <<<End of period Convention>>> ::
     We place all cash flow transactions at the end of an interest period
-- <<<Simple Interest>>> :: charging an interest rate only on the principal
++ <<<Simple Interest>>> :: charging an interest rate only on the principal
   \(F = P + I = P(1 + iN)\)
-- <<<Compound interest>>> :: charging interest on the initial sum and any previously accumulated unpaid interest
++ <<<Compound interest>>> :: charging interest on the initial sum and any previously accumulated unpaid interest
   \(F=P(1 + i)^N\)
 
+** Economic Equivaluence
+- One payment over time, what is the equivalent amount in the future?
+- principle 1
+  - equivalence calculations to compare alternatives need the same timeline
+- principle 2 equivalence depends on interest rates
+- principle 3 equivalence calculations may require the conversion of multiple payment cash flows to a single cash flow
+- principle 4 equivalence is maintained regardless of point of view, either from the leadder or from the borrower
+
 ** Examples
-*** Interest Transaction
+*** [[pdf:./notes/lecture/markup/2021a L2 Time Value of Money SimpleCompoundInterest (with notes).pdf::13][Interest Transaction]]
 - Plan 1
   + Principal: $20 000
   + Loan origination fee: $200
@@ -146,7 +155,7 @@ to compare them
 #+TBLFM: $4=20000*1.09^5
 
 - plan 1 is time value of money
-#+begin_src python :noweb no-export
+#+begin_src python :noweb no-export :exports both
 <<imports>>
 return npf.pmt(0.09, 5, -20000, when='end')
 #+end_src
@@ -155,9 +164,56 @@ return npf.pmt(0.09, 5, -20000, when='end')
 : 5141.849139134896
 
 - plan 2 is compound interest
-  #+begin_src python
-return 20000*1.09**5
+
+  #+begin_src python :exports both
+  return 20000*1.09**5
   #+end_src
 
   #+RESULTS:
   : 30772.47909800001
+*** [[][Equivalence Example 3.3]] TODO get link (l3 page 5)
+- 8% interest
+- what is the equivalent worth of $3000 in 5 years?
+  #+begin_src python :noweb no-export :exports both
+  <<imports>>
+  return pv_compound(3000, 0.08, 5)
+  #+end_src
+
+  #+RESULTS:
+  : 2041.7495911012588
+*** Equivalence Calculations with Multiple Payments 3.6
+2 options to pay off a 3 year $1000 load with 10% interest:
+| options                                                                        | year 1 | year 2 | year 3 |
+|--------------------------------------------------------------------------------+--------+--------+--------|
+| plan 1: end of year payment of interest and principal repayment at end of loan |    100 |    100 |   1100 |
+| plan 2: one end of load payment of both principal and interest                 |      0 |      0 |   1131 |
+|                                                                                |        |        |        |
+
+notice how you pay $31 more by opting to pay the interest later
+
+- option 1
+  use the compound interest formula and apply it to each $100 disbursement
+  #+begin_src python :noweb no-export :exports both
+  <<imports>>
+  return sum([fv_compound(100, 0.1, i) for i in range(3)])
+  #+end_src
+
+  #+RESULTS:
+  : 331.0
+
+- option 2
+  a single disbursement of $331
+
+*** TODO Extra Example (l3 page 14)
+you signed a load agreement with the following terms
+- borrowed amount: $2124.34
+- monthly interest rate: 1%
+- payment = $100 per month for 24 months
+
+#+begin_src python :noweb no-export :exports both
+<<imports>>
+return sum([fv_compound(100, 0.1, i) for i in range(24)])
+#+end_src
+
+#+RESULTS:
+: 8849.732675807623
