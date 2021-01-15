@@ -3,21 +3,37 @@
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 #+LaTeX_HEADER: \usepackage{graphicx}
 
-<2021-01-11 Mon>
-* Introduction
+* Formulae
+#+name: imports
+#+begin_src python :tangle util.py
+import numpy as np
+import numpy_financial as npf
+import sympy as sym
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# simple interest
+def fv_simple(P, i, N):
+    return P * (1 + i*N)
+# compound interest
+def fv_compound(P, i, N):
+    return P * (1 + i)**N
+
+#+end_src
+
+#+RESULTS: imports
+: None
+
+* Introduction <2021-01-11 Mon>
 Chapter based study questions: use right side of brain
 i.e. use common sense not exact numerical answers
 answer using experience and your understanding of the concept
 Some business problems have no clear answer unlike other engineering courses.
 **  Chapter 1
-capital expenditures: spending on behalf of the company
-
-marketing
-selling: know technical features and economic benefits
-
-operations management: know enough for day-to-day management of the business
-
-project management: proposals and justification
+- <<<capital expenditures>>> :: spending on behalf of the company
+- selling :: know technical features and economic benefits (marketing)
+- <<<operations management>>> :: know enough for day-to-day management of the business
+- <<<project management>>> :: proposals and justification
 
 *** types of businesses
 - Proprietorship: a business owned by one individual (small to medium size)
@@ -31,19 +47,18 @@ the engineer must estimate or forecast
 4. A manufacturing cost
 5. A product life
 
-6. Principle 1: A nearby penny is worth a distant dollar
+6. <<<Principle 1>>> :: A nearby penny is worth a distant dollar
    (time value of money)
-7. Principle 2: All that counts are the <<<differences among alternatives>>>
+7. <<<Principle 2>>> :: All that counts are the differences among alternatives
    - choices
-8. Principle 3: Marginal revenue must exceed marginal cost
+8. <<<Principle 3>>> :: Marginal revenue must exceed marginal cost
    - \(\delta R > \delta C\)
-9. Principle 4:  Additional risk is not taken without the expected additional return
+9. <<<Principle 4>>> ::  Additional risk is not taken without the expected additional return
 
 summary: we did the course overview
 and basic principles of engineering economics
 
-* Chapter 3
-    <2021-01-13 Wed>
+* Chapter 3 <2021-01-13 Wed>
 ** Story: Take a lump sum of $17 Million, or $1 Million Instalments for 25 years?
 
 "A nearby penny is worth a distant dollar" time value of money
@@ -87,15 +102,17 @@ to compare them
   + \(V_N = F\)
 - Cash flow diagram ::
   + Upward is positive cash flow
-    #+begin_src sh :cache yes
+    #+begin_src sh :cache yes :exports none
     convert 'notes/lecture/markup/2021a L2 Time Value of Money SimpleCompoundInterest (with notes).pdf[14]' converted_images/cash_flow_diagram.jpg
     #+end_src
+
+    #+RESULTS[d64ebe72b99af4dc8b49547fee535137cebc92f0]:
 
 [[./converted_images/cash_flow_diagram.jpg]]
 
 - End-of-period Convention ::
     We place all cash flow transactions at the end of an interest period
-- Simple Interest :: charging an interest rate only on the principal
+- <<<Simple Interest>>> :: charging an interest rate only on the principal
   \(F = P + I = P(1 + iN)\)
 - <<<Compound interest>>> :: charging interest on the initial sum and any previously accumulated unpaid interest
   \(F=P(1 + i)^N\)
@@ -129,15 +146,18 @@ to compare them
 #+TBLFM: $4=20000*1.09^5
 
 - plan 1 is time value of money
-  #+begin_src R :results output text
-  library(optiRum)
-  #PMT(rate, n, p)
-  PMT(0.09, 5, 20000)
-  #output : [1] -5141.85
+#+begin_src python :noweb no-export
+<<imports>>
+return npf.pmt(0.09, 5, -20000, when='end')
+#+end_src
+
+#+RESULTS:
+: 5141.849139134896
+
+- plan 2 is compound interest
+  #+begin_src python
+return 20000*1.09**5
   #+end_src
 
   #+RESULTS:
-  : [1] -5141.85
-
-- plan 2 is compound interest
-    \(20000*1.09^5\)
+  : 30772.47909800001
