@@ -1,21 +1,20 @@
 #+TITLE: Assignment1
 
-* Question 1
-#+begin_src R :results output org
+* R solution
+** Question 1
+#+begin_src R :exports code :results output
 5025 * 1.0349^7
 2782 * 1.0489^3
 8312 * 1.0551^3
 #+end_src
 
 #+RESULTS:
-#+begin_src org
-[1] 6388.881
-[1] 3210.402
-[1] 9763.07
-#+end_src
+: [1] 6388.881
+: [1] 3210.402
+: [1] 9763.07
 
-* Q2
-#+begin_src R :results output org :noweb yes :exports both
+** Q2
+#+begin_src R :results output :session
 present_value <- function(future_value, i, n) (future_value / (1 + i)^n)
 present_value(4501, 0.0548, 15)
 present_value(8021, 0.1138, 13)
@@ -23,31 +22,99 @@ present_value(31640, 0.0798, 19)
 #+end_src
 
 #+RESULTS:
-#+begin_src org
-[1] 2021.888
-[1] 1975.763
-[1] 7357.213
-#+end_src
-* Q3
-#+begin_src R :results output.org
+: 
+: [1] 2021.888
+: 
+: [1] 1975.763
+: 
+: [1] 7357.213
+
+** Q3
+#+begin_src R :results output
 10083/ 1.1396^9
-#+end_src
-
-#+RESULTS:
-: 3110.41116434221
-
-#+begin_src R :results output.org
 25973 * 1.1396^8
 #+end_src
 
 #+RESULTS:
-: 73882.5097986949
+: [1] 3110.411
+: [1] 73882.51
 
-* Q4
-#+begin_src R :results output.org :noweb yes
+** Q4
+#+begin_src R :results output :noweb yes
 f <- function(x)(26597*0.1/(1.1^x - 1) - 1059)
 uniroot(f, lower=0, upper=100)$root
 #+end_src
 
 #+RESULTS:
 : 13.1785413087354
+
+
+#+begin_src R :results output :session
+present_value(8021, 0.1138, 13)
+#+end_src
+
+#+RESULTS:
+: [1] 1975.763
+
+# numpy looks better to do this, let's try that
+* Python
+** Question 1
+#+begin_src python :results list
+a = 5025.0 * 1.0349**7
+b = 2782.0 * 1.0489**3
+c = 8312.0 * 1.0551**3
+
+return (a,b,c)
+#+end_src
+
+#+RESULTS:
+- 6388.880642895786
+- 3210.401738390158
+- 9763.07001122311
+
+** Q2
+#+name: present_value
+#+begin_src python :results output
+import numpy as np
+import sympy as sym
+sym.init_printing()
+x = sym.symbols('x')
+present_value = lambda future_value, i, n:  future_value / (1 + i)**n
+#+end_src
+
+#+RESULTS: present_value
+
+#+begin_src python :noweb yes :results list
+<<present_value>>
+
+a = present_value(4501, 0.0548, 15)
+b = present_value(8021, 0.1138, 13)
+c = present_value(31640, 0.0798, 19)
+
+return (a,b,c)
+#+end_src
+
+#+RESULTS:
+- 2021.8884720987605
+- 1975.7625085666568
+- 7357.213096460408
+
+** Q3
+#+begin_src python :results list
+a = 10083/ 1.1396**9
+b = 25973 * 1.1396**8
+return (a,b)
+#+end_src
+
+#+RESULTS:
+- 3110.4111643422084
+- 73882.50979869493
+
+** Q4
+#+begin_src python :noweb yes
+<<present_value>>
+return sym.solve(26597*0.1/(1.1**x - 1) - 1059, x)
+#+end_src
+
+#+RESULTS:
+| 13.1785406428013 |
