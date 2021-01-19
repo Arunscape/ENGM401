@@ -15,12 +15,15 @@ import matplotlib.pyplot as plt
 # simple interest
 def fv_simple(P, i, N):
     return P * (1 + i*N)
-# compound interest
-def fv_compound(P, i, N):
-    return P * (1 + i)**N
 
-def pv_compound(fv, i, N):
-    return fv/(1 + i)**N
+# single cash flow
+# (F/P, i, N)
+def FV(P, i, N):
+    return P * (1 + i)**N
+# single cash flow
+# (P/F, i, N)
+def PV(F, i, N):
+    return F/(1 + i)**N
 #+end_src
 
 #+RESULTS: imports
@@ -81,7 +84,7 @@ to compare them
     (e.g. loss of value because of inflation)
 + <<<Principal>>> ::
     the initial amount of money involving debt or investments
-+ <<<Interest rate>>> ::
++ Interest rate ::
     the cost or price of the money expressed as a percentage rate per period of time
 + <<<Interest period>>> ::
     a length of time that determines how frequently interest is calculated
@@ -107,6 +110,7 @@ to compare them
     #+begin_src sh :cache yes :exports none :results silent
     pdftoppm 'notes/lecture/markup/2021a L2 Time Value of Money SimpleCompoundInterest (with notes).pdf' converted_images/cash_flow_diagram -jpeg -f 15 -singlefile
     #+end_src
+
 
     #+attr_org: :width 256
     [[./converted_images/cash_flow_diagram.jpg]]
@@ -174,7 +178,7 @@ return npf.pmt(0.09, 5, -20000, when='end')
 
   #+RESULTS:
   : 30772.47909800001
-***  [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::14][Equivalence Example 3.3]]
+***  [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::5][Equivalence Example 3.3]]
 - 8% interest (yearly)
 - what is the equivalent worth of $3000 in 5 years?
   #+begin_src python :noweb no-export :exports both
@@ -184,7 +188,8 @@ return npf.pmt(0.09, 5, -20000, when='end')
 
   #+RESULTS:
   : 2041.7495911012588
-*** Equivalence Calculations with Multiple Payments 3.6
+
+***  [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::11][Equivalence Calculations with Multiple Payments 3.6]]
 2 options to pay off a 3 year $1000 load with 10% interest:
 | options                                                                        | year 1 | year 2 | year 3 |
 |--------------------------------------------------------------------------------+--------+--------+--------|
@@ -198,7 +203,7 @@ notice how you pay $31 more by opting to pay the interest later
   use the compound interest formula and apply it to each $100 disbursement
   #+begin_src python :noweb no-export :exports both
   <<imports>>
-  return sum([fv_compound(100, 0.1, i) for i in range(3)])
+  return sum([FV(100, 0.1,  n) for n in range(3)])
   #+end_src
 
   #+RESULTS:
@@ -207,7 +212,7 @@ notice how you pay $31 more by opting to pay the interest later
 - option 2
   a single disbursement of $331
 
-*** TODO Extra Example (l3 page 14)
+***  [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::14][Extra Example]]
 you signed a load agreement with the following terms
 - borrowed amount: $2124.34
 - monthly interest rate: 1%
@@ -222,29 +227,101 @@ you signed a load agreement with the following terms
   \]
 
   this is a bit tedious to calculate, will introduce formulas
+  
+*** Interest tables
+they suck
+- what is the present worth of $109 472 to be received 15 periods from today at a discounting rate of 12%
 
-#+begin_src python :noweb no-export :exports both
+  #+begin_src python :noweb no-export :exports both :results output
 <<imports>>
-#+end_src
-*** Example 3.11 Present Values of an Uneven Series by Decomposition into Single Payments
-How much do you need to deposit today (P) to withdraw $25 000 at n=1, $3000 at n=2,
-TODO: finish this example
+p = PV(109472, 0.12, 15)
+print("present value", p)
+p = npf.pv(0.12, 15, 0, -109472)
+print("present value", p)
+# https://numpy.org/doc/stable/reference/generated/numpy.rate.html#numpy.rate
+r = npf.rate(15, 0, -20000, 109472)
+print("rate to make 20000 worth 109472", r)
+n = npf.nper(0.12, 0, -20000, 109472)
+print("num periods", n)
+  #+end_src
+
+  #+RESULTS:
+  : present value 20000.125113114413
+  : present value 20000.125113114413
+  : rate to make 20000 worth 109472 0.1200004670875983
+  : 15.000055199053419
+
+
+*** [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::26][Example 3.11 Present Values of an Uneven Series by Decomposition into Single Payments]]
+How much do you need to deposit today (P) to withdraw:
+- $25 000 at n=1,
+- $3000 at n=2,
+- at n=4,
+
+if your account earns 10% per period?
+  #+begin_src python :noweb no-export :exports both :results value
+<<imports>>
+return PV(25000, 0.1, 1) + PV(3000, 0.1, 2) + PV(5000, 0.1, 4)
+  #+end_src
+
+  #+RESULTS:
+  : 28621.678847073283
+
+*** [[pdf:./notes/lecture/markup/2021a L4 Interest Formula for Conventional Series (with notes).pdf::4][Example 3.13 Present Values of an Uneven Series by Decomposition into Single Payments]]
+Suppose you make an annual contribution of $3000 to your savings account at the end of each year for 10 years.
+If the account earns 7% interest annually, how much can be withdrawn at the end of 10 years?
+  #+begin_src python :noweb no-export :exports both :results value
+<<imports>>
+return npf.fv(0.07, 10, 3000, 0)
+  #+end_src
+
+  #+RESULTS:
+  : -41449.34388383856
+
+*** [[pdf:./notes/lecture/markup/2021a L4 Interest Formula for Conventional Series (with notes).pdf::7][Example 3.16 Present Values of an Uneven Series by Decomposition into Single Payments]]
+A. invest $2000 per year for the first 10 years of your career 
+   - at the end of 10 years, make no further investments but reinvest the amount accumulated at the end of 10 years for the next 31 years
+B. do nothing for the next 10 years
+   - start investing $2000 per year for the next 31 years
+
+C. invest $2000 per year for the entire 41 years
+
+All investments are made at the beginning of each year. The first deposit will be made at the beginning of age 25 (n=0) and you want to calculate the balance at the age of 65 (n=41)
+
+(At time 0, work with this as a single payment)
+
+A. TODO: this is wrong, fix it
+   #+begin_src python :noweb no-export :exports both :results output
+<<imports>>
+a= npf.pv(0.0938, 10, 2000)
+print(a)
+a= npf.fv(0.0938, 31,0,  a)
+print(a)
+   #+end_src
+
+   #+RESULTS:
+   : -12623.389533769092
+   : 203353.41688549702
+
+
 
 ** Types of cash flows
- TODO: insert five types of cash flows slide 5-20
- TODO: insert formula sheet
+[[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::20][5 Types of Cash Flows Diagrams]]
+TODO: insert formula sheet
 - Single cash flow :: a single present or future cash flow
-  - Compound Amount Factor
+  - Compound Amount Factor :: (F/A, i, N)
     \( (F/P, i, N) = (i+1)^N\)
-  - Present Worth Factor
-    \(P/F, i, N = 1/(1+i)^N\)
-
+    - computes the equivalent future value F, given a present value P
+  - Present Worth Factor :: (P/A, i, N)
+    \(P/F, i, N = \frac{1}{(1+i)^N}\)
+    - calculates the equivalent present value P given a future falue
   - the interest rate \(i\) and the \(P/F\) factor are also referred to as the <<<discount rate>>> and <<<discounting factor>>>
 - Equal (uniform) series :: (uniform) a series of cash flows of equal amounts at regular intervals
-- Linear Gradient Series :: a series of clash flows increasing or decreasing by a fixed amount at regular intervals
+- Linear Gradient Series :: a series of cash flows increasing or decreasing by a fixed amount at regular intervals
 - Geometric Gradient Series :: a series of cash flows increasing or decreasing by a fixed percentage at regular intervals
   - aka compounding series
 - Irregular (Mixed) Series :: a series of cash flows exhibiting no overall pattern
   + there still might be patterns for portions of the series, but overall there is no pattern
-
-fire
+- Sinking Fund Factor :: (A/F, i, N)
+  - a sinking fund is an interest bearing account into which a fixed sum is deposited each interest period
+  - it is commonly established for the purpose of replacing fixed assets or retiring corporate bonds
