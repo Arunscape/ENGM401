@@ -119,6 +119,9 @@ to compare them
   \(F=P(1 + i)^N\)
 
 ** Economic Equivaluence
+exists between individual cash flows and/or patterns of cash flows that have the *same economic effect* and could therefore
+be traded for one another. Even though the amounts and timing of the cash flows might differ, the appropriaate interest rate
+may make them equivalent
 - One payment over time, what is the equivalent amount in the future?
 - principle 1
   - equivalence calculations to compare alternatives need the same timeline
@@ -171,8 +174,8 @@ return npf.pmt(0.09, 5, -20000, when='end')
 
   #+RESULTS:
   : 30772.47909800001
-*** [[][Equivalence Example 3.3]] TODO get link (l3 page 5)
-- 8% interest
+***  [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::14][Equivalence Example 3.3]]
+- 8% interest (yearly)
 - what is the equivalent worth of $3000 in 5 years?
   #+begin_src python :noweb no-export :exports both
   <<imports>>
@@ -209,11 +212,39 @@ you signed a load agreement with the following terms
 - borrowed amount: $2124.34
 - monthly interest rate: 1%
 - payment = $100 per month for 24 months
+- how to interpret using equivalence?
+- discounting to first payment
+
+  \(P = \sum_{n=1}^{24} P_n\)
+
+  \[
+  P_{total} = \sum_{n=1}^{24} \frac{A_n}{(1+i)^n}
+  \]
+
+  this is a bit tedious to calculate, will introduce formulas
 
 #+begin_src python :noweb no-export :exports both
 <<imports>>
-return sum([fv_compound(100, 0.1, i) for i in range(24)])
 #+end_src
+*** Example 3.11 Present Values of an Uneven Series by Decomposition into Single Payments
+How much do you need to deposit today (P) to withdraw $25 000 at n=1, $3000 at n=2,
+TODO: finish this example
 
-#+RESULTS:
-: 8849.732675807623
+** Types of cash flows
+ TODO: insert five types of cash flows slide 5-20
+ TODO: insert formula sheet
+- Single cash flow :: a single present or future cash flow
+  - Compound Amount Factor
+    \( (F/P, i, N) = (i+1)^N\)
+  - Present Worth Factor
+    \(P/F, i, N = 1/(1+i)^N\)
+
+  - the interest rate \(i\) and the \(P/F\) factor are also referred to as the <<<discount rate>>> and <<<discounting factor>>>
+- Equal (uniform) series :: (uniform) a series of cash flows of equal amounts at regular intervals
+- Linear Gradient Series :: a series of clash flows increasing or decreasing by a fixed amount at regular intervals
+- Geometric Gradient Series :: a series of cash flows increasing or decreasing by a fixed percentage at regular intervals
+  - aka compounding series
+- Irregular (Mixed) Series :: a series of cash flows exhibiting no overall pattern
+  + there still might be patterns for portions of the series, but overall there is no pattern
+
+fire
