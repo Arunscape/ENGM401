@@ -293,17 +293,66 @@ All investments are made at the beginning of each year. The first deposit will b
 A. TODO: this is wrong, fix it
    #+begin_src python :noweb no-export :exports both :results output
 <<imports>>
-a= npf.pv(0.0938, 10, 2000)
+a= npf.fv(0.0938, 10, 2000)
 print(a)
 a= npf.fv(0.0938, 31,0,  a)
 print(a)
    #+end_src
 
    #+RESULTS:
-   : -12623.389533769092
-   : 203353.41688549702
+*** Example 3.18 Deferred Loan Repayment
+Suppose that BioGen wants to negotiate with the bank to defer the first loan repayment until the end of year 2 (but still desires to make six equal installments at 8% interest). If the bank wishes to earn the same profit, what should be the annual installment, also known as deferred annuity?
+
+the equal series fits well, except for the deferred payment. So, apply time shifting
+\[P' = \$250000 (F/P, 8\%, 1)]
+   #+begin_src python :noweb no-export :exports both :results output
+<<imports>>
+i = 0.08
+N=6 # but tje first payment happens at year 2
+   #+end_src
+   TODO:
+*** Example 3.19 Millionaire life example
+Let us revisit the Millionaire Life example. Suppose that you had selected the annual payment option. Let’s see how your decision stands up against the $17 million cash prize option. If you could invest your money at 8% interest, what is the present worth of the 25 future payments at $1,000,000 per year for 25 years?
+
+   #+begin_src python :noweb no-export :exports both :results value
+<<imports>>
+A=1000000
+i = 0.08
+N=25
+return npf.pv(i, N, -A)
+   #+end_src
+
+   #+RESULTS:
+   : 10674776.188588582
+
+   Turns out you're better off taking the $17 million up front
+
+*** Example 3.20
+The maintenance costs for a truck during the first year will be $1,000 and are expected to increase at a rate of $250 per year. The firm wants to set up a maintenance account that earns 12% annual interest. How much does the firm have to deposit in the account now?
+
+View this as a equal (uniform) series with a linear gradient
+
+   #+begin_src python :noweb no-export :exports both :results value
+<<imports>>
+A_1 = 1000
+G = 250
+i = 0.12
+N = 5
+   #+end_src
+
+*** Example 3.21
+Find the equal amount for equal payment series to have the same money at the end as the geometric
+   #+begin_src python :noweb no-export :exports both :results value
+<<imports>>
+A_1 = 1000
+G = 300
+i = 0.1
+N = 6
+   #+end_src
 
 
+*** Example 3.22
+*** Example 3.23
 
 ** Types of cash flows
 [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::20][5 Types of Cash Flows Diagrams]]
@@ -325,3 +374,66 @@ TODO: insert formula sheet
 - Sinking Fund Factor :: (A/F, i, N)
   - a sinking fund is an interest bearing account into which a fixed sum is deposited each interest period
   - it is commonly established for the purpose of replacing fixed assets or retiring corporate bonds
+- Capital Recovery Factor :: (A/P, i, N)
+  - used to determine the revenue requirements needed to address the upfront capital costs for projects
+  - A/P factor is referred to as the <<<annuity>>> and indicates a series of payments of a fixed or constant amount for specified number of periods
+  - limiting case when N -> infinity ; A=P*i
+- Present Worth Factor :: (P/A, i, N)
+  - What would you have to invest now in order to withdraw A dollars at the end of each of the next N periods?
+- Linear Gradient Series ::
+  - Gradient to equal payment series conversion factor (A/G, i, N)
+  - *the cash flow in period 1 is zero*
+  - the cash flows in periods 2 through N increase a constant amount
+  - G is the increment
+  - Present Worth Factor :: Linear Gradient (P/G, i, N)
+    - limiting case when N -> infinity ; \(P = G/i^2\)
+  - Conversion Factor :: (A/G, i, N)
+- Geometric Gradient Series ::
+  series of cash flows that increase or decrease by a constant percentage each period (ex: price changes by inflation)
+  - g is the percentage change
+  - Present Worth Factor :: (P/A_1, g, i, N)
+
+
+* Chapter 4
+** Story: Mortgages
+Canadians have the choice of using a variable-rate mortgage or a fixed-rate mortgage to finance their homes.The interest rate charged on a variable-rate mortgage is tied to the prime rate, which is adjusted from time to time.A fixed-rate mortgage charges a fixed interest rate over a specified period of time
+
+- nominal interest rate :: a stated rate of interest for a given period (usually a year)
+  - a.k.a. APR
+  - the yearly cost of a loan expressed as a percentage
+  - 18% APR compounded monthly means
+    1. each month the bank will charge 1.5% interest on an unpaid balance
+    2. you will earn 1.5% interest each month on your remaining balance if you deposited money
+
+- effective interest rate :: the actual rate of interest, which accounts for the interest amount accumulated over a given period
+  - effective annual interest rate is the rate that truly represents the interest earned or paid in one year
+    + compounding within the year is considered
+  - The 18% APR compounded monthly means the bank will charge 1.5% interest on any unpaid balance at the end of each month. Therefore, the 1.5% rate represents the effective interest rate per month. On a yearly basis, you are looking for a cumulative rate —1.5% each month for 12 months.
+
+  - r = nominal interest rate per year
+  - M = number of compounding periods per year
+  - i_a = effective annual interest rate
+
+    \[i_a = (1 + \frac{r}{M})^M - 1\]
+
+    when \(M \to \infty, i_a = e^r - 1\)
+
+** Examples
+*** Savings Account With Interest Rate of 9% Compounded Quarterly
+You deposit $10,000 in a savings account with an APR of 9% compounded quarterly. The interest rate per quarter is 2.25% (9%/4).
+
+*** Example: Find i_a given different M values
+
+Given an APR value of 15% compounded annually, semi-annually, monthly, daily, or continuously, find the annual effective interest rate in each case.
+
+1. annually: i_a = APR = 15%
+2. semi annually m = 2 i_a = (1+15%/2)^2 - 1 = 15.563%
+3. monthly m=12 i_a = (1 + 15%/2)^12 = 16.0755%
+4. m = 365
+5. continuously I_a =
+
+
+Takeaway: the more often you compound, the higher the interest rate
+
+
+*** Example 4.1 Determining the Compounding Frequency

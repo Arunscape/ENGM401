@@ -5,8 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # simple interest
-def fv_simple(P, i, N):
+def fv_simple(P, i, N) -> float:
     return P * (1 + i*N)
 # compound interest
-def fv_compound(P, i, N):
+def fv_compound(P, i, N) -> float:
     return P * (1 + i)**N
