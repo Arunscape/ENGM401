@@ -24,6 +24,9 @@ def FV(P, i, N):
 # (P/F, i, N)
 def PV(F, i, N):
     return F/(1 + i)**N
+
+def effective_rate_per_interest_period(r, M, K):
+    return (1+ r/M)**(M/K) -1
 #+end_src
 
 #+RESULTS: imports
@@ -417,6 +420,41 @@ Canadians have the choice of using a variable-rate mortgage or a fixed-rate mort
     \[i_a = (1 + \frac{r}{M})^M - 1\]
 
     when \(M \to \infty, i_a = e^r - 1\)
+- effective interest rates per payment period ::
+  we can generalize the effective annual interest rate formula to compute the effective interest rate for periods of any duration
+  + M = number of compounding periods per year
+  + C = number of compounding periods per payment period
+  + K = number of payment periods per year
+  + \(M=CK\)
+
+  \[i = (1 + \frac{r}{m})^C -1 = (1+\frac{r}{M})^{\frac{M}{K}} -1\]
+
+  - continuous compounding ::
+
+\[i_e = e^{\frac{r}{K}} -1\]
+
+r/K is per payment period
+
+- when payment period is equal to compounding period (M=K => C=1)
+  1) Identify number of compounding periods (M) per year
+  2) compute the effective intereswt rate per payment period (i)
+     \(i=r/M\)
+  3) determine the total number of payment periods (N)
+     \(N=M \times (number of years)\)
+
+- compounding occurs at a different frequency from the payment frequency
+  1) compounding is more frequent than payments
+  2) compounding is less frequent than payments
+     - usually a bad idea because there's no benefit from paying earlier when that money could be making interest for you
+
+       TODO : insert decision flow chart 9-14
+
+- changing interest rates
+  When an equivalence calculation extends over several years, more than one interest rate may be applicable to properly account for the time value of money.
+
+  consider variable interest rates in
+  a) single payments
+  b) single payments and a series of cash flows
 
 ** Examples
 *** Savings Account With Interest Rate of 9% Compounded Quarterly
@@ -437,3 +475,135 @@ Takeaway: the more often you compound, the higher the interest rate
 
 
 *** Example 4.1 Determining the Compounding Frequency
+
+- r = 3.5%
+- i_a (APY) = 3.53%
+- P = $100 000
+- N = 2 years
+
+  compounding frequency assumed is
+
+  \(0.0353 = (1 + \frac{0.0350}{M})^M -1\)
+  \(M=2\)
+
+  total balance 2 years later:
+  \(F = 100000(F/P, 3.53%, 2) - 107.185\)
+
+*** Example 4.2 Effective rate per payment period
+Suppose that you make quarterly deposits in a savings account that earns 9% interest compounded monthly. Compute the effective interest rate per quarter
+
+  \[i = (1 + \frac{r}{M})^C -1\]
+
+  TODO make python function
+#+begin_src python :noweb no-export
+r = 0.0938
+C = 3
+K = 4
+M = 12
+return (1 + 0.09/12)**3 - 1
+#+end_src
+
+#+RESULTS:
+: 0.022669171875000282
+
+
+*** Example 4.3
+a) quarterly: M=1
+b) monthly: M=12
+
+*** Extra Example 1
+Suppose you make equal quarterly deposits of $1500 each into a fund that pays interest at a rate of 6% compounded monthly. Find balance at the end of year 2.
+
+#+begin_src python :noweb no-export
+<<imports>>
+r = 0.06
+M=12
+K=4
+i = effective_rate_per_interest_period(r, M, K)
+
+future_value = lambda x: print("todo")
+return i
+#+end_src
+
+#+RESULTS:
+: 0.015075124999999634
+
+*** Extra Example 2
+A loan company offers money at 1.8% per month, compounded monthly.
+a) What is the nominal interest rate?
+b) What is the effective annual interest rate?
+c) How many years will it take for a borrowed amount to tripleif no payments are made?
+
+#+begin_src python :noweb no-export :results output
+<<imports>>
+r = 0.018
+M=12
+K=12
+
+APR = r * 12
+
+print(f"nominal interest rate: {APR}") # should be 21.6%
+
+
+i_a = effective_rate_per_interest_period(APR, M, K)
+print(f"effective annual interest rate: {i_a}") # should be 23.87%
+
+# p(1 + i_a)^N = 3P => solve for N (should be 6)
+
+#+end_src
+
+#+RESULTS:
+: nominal interest rate: 0.21599999999999997
+: effective annual interest rate: 0.018000000000000016
+
+*** Extra Example 3
+If the interest rate is 8.5% compounded continuously, what is the required quarterly payment to repay a loan of $12,000 in five years?
+
+#+begin_src python :noweb no-export :results output
+<<imports>>
+r = 0.085
+M=12
+K=4
+
+# quarterly
+#i_e = e^(8.5%/4) -1 = 2.148%
+# A = P(A/P, 2.148%, 20)
+# = 744
+
+#+end_src
+
+#+RESULTS:
+: nominal interest rate: 0.21599999999999997
+
+*** Example 4.4 Auto loan payments
+- sale price: 21355
+- down payment: 6355
+- interest rate: 6.25 annual APR compunded monthly
+- pay monthly
+- 72 months length of financing
+
+  i_e = 6.25%/12
+
+  A = P(A/P, 0.05208, 72) = 15000*0.0167 = 250.37
+
+*** Example 4.5
+
+*** Example 4.6 Compounding more frequently than payment
+A series of equal quarterly receipts of $500 extends over a period of five years. What is the present worth of this quarterly payment series at 8% interest compounded continuously?
+#+begin_src python :noweb no-export :results output
+<<imports>>
+r = 0.085
+M=12
+K=4
+
+# quarterly
+#i_e = e^(8%/4) -1 = 2.028%
+
+#+end_src
+
+*** Example 4.7 Compounding less frequent than payments
+
+*** Example 4.10
+*** Example 4.11
+
+*** Extra Example Changing interest rate
