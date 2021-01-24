@@ -443,14 +443,23 @@ All investments are made at the beginning of each year. The first deposit will b
 A. TODO: this is wrong, fix it
    #+begin_src python :noweb no-export :exports both :results output
 <<imports>>
-i=
-a= eq_future(A=2000, i)
-print(a)
+# investments are made at the beginning of each year, need to time shift
+i=0.0938
+a= eq_future(A=2000, i=i, N=11)
+print(f"a after 10 years: {a}")
+a = single_future(P=a, i=i, N=31)
+print(f"a after 31 years: {a}")
 a= npf.fv(0.0938, 31,0,  a)
 print(a)
+
+print(f"time shift {single_future(P=0, i=i, N=1)}")
    #+end_src
 
    #+RESULTS:
+   : a after 10 years: 35844.88894182197
+   : a after 31 years: 577434.5016210761
+   : -9302040.360720742
+   : time shift 0.0
 *** Example 3.18 Deferred Loan Repayment
 Suppose that BioGen wants to negotiate with the bank to defer the first loan repayment until the end of year 2 (but still desires to make six equal installments at 8% interest). If the bank wishes to earn the same profit, what should be the annual installment, also known as deferred annuity?
 
@@ -754,3 +763,9 @@ K=4
 *** Example 4.11
 
 *** Extra Example Changing interest rate
+#+begin_src python :results output
+print("hello")
+#+end_src
+
+#+RESULTS:
+: hello
