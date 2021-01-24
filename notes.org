@@ -12,21 +12,198 @@ import sympy as sym
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# simple interest
-def fv_simple(P, i, N):
+
+class FormulaError(Exception):
+    """Exception raised for errors in my formulae
+
+    Attributes:
+        factor_notation: str
+        message -- explanation of the error
+    """
+
+    def __init__(self, factor_notation: str, message: str):
+        self.factor_notation = factor_notation
+        self.message = message
+
+    def __str__(self):
+        return f"{self.factor_notation} -> {self.message}"
+        
+
+def simple_interest(**kwargs):
+    fn = "simple interest"
+    if 'P' not in kwargs:
+        raise FormulaError(fn, "P, or principle amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    P = kwargs['P']
+    i = kwargs['i']
+    N = kwargs['N']
     return P * (1 + i*N)
 
-# single cash flow
-# (F/P, i, N)
-def FV(P, i, N):
+def single_future(**kwargs):
+    fn = "single cash flow (F/P, i, N)" 
+    if 'P' not in kwargs:
+        raise FormulaError(fn, "P, or principle amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    P = kwargs['P']
+    i = kwargs['i']
+    N = kwargs['N']
     return P * (1 + i)**N
-# single cash flow
-# (P/F, i, N)
-def PV(F, i, N):
+
+def single_present(**kwargs):
+    fn = "single cash flow (P/F, i, N)"
+    if 'F' not in kwargs:
+        raise FormulaError(fn, "F, or future amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    F = kwargs['F']
+    i = kwargs['i']
+    N = kwargs['N']
     return F/(1 + i)**N
 
+def single_rate(**kwargs):
+    fn = "find the discounting tate that makes a present amount equivalent to a future amount"
+    if 'F' not in kwargs:
+        raise FormulaError(fn, "F, or future amount not provided")
+    if 'P' not in kwargs:
+        raise FormulaError(fn, "P, or present amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    P = kwargs['P']
+    F = kwargs['F']
+    i = kwargs['i']
+    N = kwargs['N']
+    return npf.rate(N, 0, -P, F)
+
+def eq_compound(**kwargs):
+    fn = "equal payment series (F/A, i, N)"
+    if 'A' not in kwargs:
+        raise FormulaError(fn, "A, or future amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    A = kwargs['A']
+    i = kwargs['i']
+    N = kwargs['N']
+    return A * ((1+i)**N -1) / i 
+        
+def eq_sinking(**kwargs):
+    fn = "equal payment series (A/F, i N)"
+    if 'F' not in kwargs:
+        raise FormulaError(fn, "F, or future amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    F = kwargs['F']
+    i = kwargs['i']
+    N = kwargs['N']
+    return F * i/ ((1+i)**N - 1)
+
+def eq_present(**kwargs):
+    fn = "equal payment (P/A, i, N)"
+    if 'A' not in kwargs:
+        raise FormulaError(fn, "A, or future amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    A = kwargs['A']
+    i = kwargs['i']
+    N = kwargs['N']
+
+    return A * ((1+i)**N - 1) / (i * (1+i)**N)
+
+def eq_capital_recovery(**kwargs):
+    fn = "equal payment (A/P, i, N)"
+    if 'P' not in kwargs:
+        raise FormulaError(fn, "P, or principle amount not provided")
+    elif 'i' not in kwargs:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+    elif 'N' not in kwargs:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    P = kwargs['P']
+    i = kwargs['i']
+    N = kwargs['N']
+
+    return P * (i * (1 + i)**N) / ((1 + i)**N - 1)
+    
+
+def linear_present(**kwargs):
+   fn = "gradient series (P/G, i, N)"
+   if 'G' not in kwargs:
+       raise FormulaError(fn, "G, or the first payment at period 2 is missing")
+   elif 'i' not in kwargs:
+       raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+   elif 'N' not in kwargs:
+       raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+   G = kwargs['G']
+   i = kwargs['i']
+   N = kwargs['N']
+
+   return G * ( (1+i)**N - i*N - 1 ) / (i**2 * (1 + i)**N)
+
+
+def linear_conversion(**kwargs):
+   fn = "gradient series (A/G, i, N)"
+   if 'G' not in kwargs:
+       raise FormulaError(fn, "G, or the first payment at period 2 is missing")
+   elif 'i' not in kwargs:
+       raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+   elif 'N' not in kwargs:
+       raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+   G = kwargs['G']
+   i = kwargs['i']
+   N = kwargs['N']
+
+   return G * ( (1+i)**N - i*N - 1) / (i * ((1+i)**N - 1))
+    
+    
+def geo_present(**kwargs):
+   fn = "geometric gradient series (P/A_1, g, i, N)"
+   if 'A1' not in kwargs:
+       raise FormulaError(fn, "A1, or the first payment at period 1 is missing")
+   elif 'g' not in kwargs:
+       raise FormulaError(fn, "g, or the growth rate is missing")
+   elif 'i' not in kwargs:
+       raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
+   elif 'N' not in kwargs:
+       raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+   A1 = kwargs['A1']
+   g = kwargs['g']
+   i = kwargs['i']
+   N = kwargs['N']
+
+   if i == g:
+       return A1 * N / (1+i)
+
+   return A1 * (1 - (1+g)**N * (1+i)**(-N)) / (i-g)
+
+        
 def effective_rate_per_interest_period(r, M, K):
     return (1+ r/M)**(M/K) -1
+
 #+end_src
 
 #+RESULTS: imports
@@ -167,17 +344,19 @@ may make them equivalent
 - plan 1 is time value of money
 #+begin_src python :noweb no-export :exports both
 <<imports>>
-return npf.pmt(0.09, 5, -20000, when='end')
+# should be 5141.85
+return eq_capital_recovery(P=20000, i=0.09, N=5)
 #+end_src
 
 #+RESULTS:
-: 5141.849139134896
+: 5141.849139134897
 
 - plan 2 is compound interest
 
-  #+begin_src python :exports both
-  return 20000*1.09**5
-  #+end_src
+#+begin_src python :noweb no-export
+<<imports>>
+return single_future(P=20000, i=0.09, N=5) # about 30772.47
+#+end_src
 
   #+RESULTS:
   : 30772.47909800001
@@ -186,7 +365,8 @@ return npf.pmt(0.09, 5, -20000, when='end')
 - what is the equivalent worth of $3000 in 5 years?
   #+begin_src python :noweb no-export :exports both
   <<imports>>
-  return pv_compound(3000, 0.08, 5)
+  # about 2041.79
+  return single_present(F=3000, i=0.08, N=5)
   #+end_src
 
   #+RESULTS:
@@ -206,7 +386,7 @@ notice how you pay $31 more by opting to pay the interest later
   use the compound interest formula and apply it to each $100 disbursement
   #+begin_src python :noweb no-export :exports both
   <<imports>>
-  return sum([FV(100, 0.1,  n) for n in range(3)])
+  return sum([single_future(P=100, i=0.1,  N=n) for n in range(3)])
   #+end_src
 
   #+RESULTS:
@@ -237,15 +417,13 @@ they suck
 
   #+begin_src python :noweb no-export :exports both :results output
 <<imports>>
-p = PV(109472, 0.12, 15)
-print("present value", p)
-p = npf.pv(0.12, 15, 0, -109472)
-print("present value", p)
+p = single_present(109472, 0.12, 15)
+print("present value", p) # 20k
 # https://numpy.org/doc/stable/reference/generated/numpy.rate.html#numpy.rate
 r = npf.rate(15, 0, -20000, 109472)
-print("rate to make 20000 worth 109472", r)
+print("rate to make 20000 worth 109472", r) #12%
 n = npf.nper(0.12, 0, -20000, 109472)
-print("num periods", n)
+print("num periods", n) # 15
   #+end_src
 
   #+RESULTS:
@@ -275,11 +453,11 @@ Suppose you make an annual contribution of $3000 to your savings account at the 
 If the account earns 7% interest annually, how much can be withdrawn at the end of 10 years?
   #+begin_src python :noweb no-export :exports both :results value
 <<imports>>
-return npf.fv(0.07, 10, 3000, 0)
+return npf.fv(0.07, 10, -3000, 0) # should be $41449.20
   #+end_src
 
   #+RESULTS:
-  : -41449.34388383856
+  : 41449.34388383856
 
 *** [[pdf:./notes/lecture/markup/2021a L4 Interest Formula for Conventional Series (with notes).pdf::7][Example 3.16 Present Values of an Uneven Series by Decomposition into Single Payments]]
 A. invest $2000 per year for the first 10 years of your career 
@@ -573,7 +751,6 @@ K=4
 #+end_src
 
 #+RESULTS:
-: nominal interest rate: 0.21599999999999997
 
 *** Example 4.4 Auto loan payments
 - sale price: 21355
