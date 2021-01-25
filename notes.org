@@ -173,7 +173,12 @@ def geo_present(A1=None, g=None, i=None, N=None):
 
         
 def effective_rate_per_interest_period(r=None, M=None, K=None, C=None):
-    fn = "effective_rate_per_interest_period: i_a"
+    fn = """effective_rate_per_interest_period: i_a
+    r = APR or nominal interest rate per year
+    M = number of compounding periods per year, M=CK
+    C = number of compounding periods per payment period
+    K = number of payment periods per year
+    """
 
     if r is None:
         raise FormulaError(fn, "r, or APR, or nominal interest rate per year is missing")
@@ -181,10 +186,20 @@ def effective_rate_per_interest_period(r=None, M=None, K=None, C=None):
     if M == math.inf:
         return math.exp(r) -1
 
-    if M is None:
-        raise FormulaError(fn, "M, or number of compounding periods per year is missing")
-    
-    return (1+ r/M)**(M/K) -1
+    if C is not None and K is not None and M is None:
+        return (1+ r/(C*K))**C - 1
+
+    if K is None and C is None and M is not None:
+        return (1 + r/M)**M - 1
+
+    if C is not None and K is None and M is not None:
+        return (1+r/M)**C - 1
+
+    if M is not None and K is not None and C is None and M is not None:
+        return (1+ r/M)**(M/K) -1
+
+    raise FormulaError(fn, "invalid combo of inputs")
+
 
 #+end_src
 
@@ -729,14 +744,20 @@ Given an APR value of 15% compounded annually, semi-annually, monthly, daily, or
 <<imports>>
 for M in [1, 2, 12, 365, math.inf]:
     ia = effective_rate_per_interest_period(M=M, r=0.15)
-    print(f"M: {M} i_a: {ia}")
+    M = str(M).ljust(3)
+    print(f"M={M} i_a: {ia*100}%")
 #+end_src
 
 #+RESULTS:
+: M=1   i_a: 14.999999999999991%
+: M=2   i_a: 15.56249999999999%
+: M=12  i_a: 16.075451772299807%
+: M=365 i_a: 16.179844312827374%
+: M=inf i_a: 16.183424272828304%
    
 
 
-Takeaway: the more often you compound, the higher the interest rate
+Takeaway: the more often you compound, the higher the interest rate (diminishing returns, and there is a limit)
 
 
 *** Example 4.1 Determining the Compounding Frequency
@@ -753,6 +774,8 @@ Takeaway: the more often you compound, the higher the interest rate
 
   total balance 2 years later:
   \(F = 100000(F/P, 3.53%, 2) - 107.185\)
+
+a) M is 2 by trial and error
 
 *** Example 4.2 Effective rate per payment period
 Suppose that you make quarterly deposits in a savings account that earns 9% interest compounded monthly. Compute the effective interest rate per quarter
