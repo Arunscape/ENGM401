@@ -184,7 +184,7 @@ def effective_rate_per_interest_period(r=None, M=None, K=None, C=None):
         raise FormulaError(fn, "r, or APR, or nominal interest rate per year is missing")
     
     if M == math.inf:
-        return math.exp(r) -1
+        return math.exp(r/K) -1
 
     if C is not None and K is not None and M is None:
         return (1+ r/(C*K))**C - 1
@@ -784,11 +784,12 @@ Suppose that you make quarterly deposits in a savings account that earns 9% inte
 
   TODO make python function
 #+begin_src python :noweb no-export
-r = 0.0938
-C = 3
+<<imports>>
+r = 0.09
 K = 4
 M = 12
-return (1 + 0.09/12)**3 - 1
+#return (1 + 0.09/12)**3 - 1
+return effective_rate_per_interest_period(r=r, M=M, K=K)
 #+end_src
 
 #+RESULTS:
