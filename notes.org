@@ -11,6 +11,7 @@ import numpy_financial as npf
 import sympy as sym
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 
 
 class FormulaError(Exception):
@@ -63,7 +64,7 @@ def single_present(F=None, i=None, N=None):
     return F/(1 + i)**N
 
 def single_rate(F=None, P=None, N=None):
-    fn = "find the discounting tate that makes a present amount equivalent to a future amount"
+    fn = "find the discounting rate that makes a present amount equivalent to a future amount"
     if F is None:
         raise FormulaError(fn, "F, or future amount not provided")
     if P is None:
@@ -75,7 +76,7 @@ def single_rate(F=None, P=None, N=None):
 
 
 def single_periods(F=None, P=None, i=None):
-    fn = "find the discounting tate that makes a present amount equivalent to a future amount"
+    fn = "find the number of periods makes a present amount equivalent to a future amount"
     if F is None:
         raise FormulaError(fn, "F, or future amount not provided")
     if P is None:
@@ -97,7 +98,7 @@ def eq_future(A=None, i=None, N=None):
     return A * ((1+i)**N -1) / i 
         
 def eq_sinking(F=None, i=None, N=None):
-    fn = "equal payment series (A/F, i N)"
+    fn = "equal payment series (A/F, i N): gives future value"
     if F is None:
         raise FormulaError(fn, "F, or future amount not provided")
     elif i is None:
@@ -119,7 +120,7 @@ def eq_present(A=None, i=None, N=None):
     return A * ((1+i)**N - 1) / (i * (1+i)**N)
 
 def eq_capital_recovery(P=None, i=None, N=None):
-    fn = "equal payment (A/P, i, N)"
+    fn = "equal payment (A/P, i, N): gives A"
     if P is None:
         raise FormulaError(fn, "P, or principle amount not provided")
     elif i is None:
@@ -143,7 +144,7 @@ def linear_present(G=None, i=None, N=None):
 
 
 def linear_conversion(G=None, i=None, N=None):
-   fn = "gradient series (A/G, i, N)"
+   fn = "gradient series (A/G, i, N): gives A"
    if G is None:
        raise FormulaError(fn, "G, or the first payment at period 2 is missing")
    elif i is None:
@@ -171,7 +172,18 @@ def geo_present(A1=None, g=None, i=None, N=None):
    return A1 * (1 - (1+g)**N * (1+i)**(-N)) / (i-g)
 
         
-def effective_rate_per_interest_period(r=None, M=None, K=None):
+def effective_rate_per_interest_period(r=None, M=None, K=None, C=None):
+    fn = "effective_rate_per_interest_period: i_a"
+
+    if r is None:
+        raise FormulaError(fn, "r, or APR, or nominal interest rate per year is missing")
+    
+    if M == math.inf:
+        return math.exp(r) -1
+
+    if M is None:
+        raise FormulaError(fn, "M, or number of compounding periods per year is missing")
+    
     return (1+ r/M)**(M/K) -1
 
 #+end_src
@@ -445,32 +457,46 @@ A. TODO: this is wrong, fix it
 <<imports>>
 # investments are made at the beginning of each year, need to time shift
 i=0.0938
-a= eq_future(A=2000, i=i, N=11)
+# I'm not sure if this is right
+time_shift = (1+i)**1
+a= eq_future(A=2000, i=i, N=10) * time_shift
 print(f"a after 10 years: {a}")
 a = single_future(P=a, i=i, N=31)
-print(f"a after 31 years: {a}")
-a= npf.fv(0.0938, 31,0,  a)
-print(a)
+print(f"a after 10 + 31 years: {a}")
+
+b = eq_future(A=2000, i=i, N=31) * time_shift
+print(f"b after 31 years: {b}")
+
+c = eq_future(A=2000, i=i, N=41) * time_shift
+print(f"c after 41 years: {c}")
 
 print(f"time shift {single_future(P=0, i=i, N=1)}")
    #+end_src
 
    #+RESULTS:
-   : a after 10 years: 35844.88894182197
-   : a after 31 years: 577434.5016210761
-   : -9302040.360720742
+   : a after 10 years: 33844.88894182197
+   : a after 10 + 31 years: 545215.9890985081
+   : b after 31 years: 352377.49463949824
+   : c after 41 years: 897593.4837380064
    : time shift 0.0
 *** Example 3.18 Deferred Loan Repayment
-Suppose that BioGen wants to negotiate with the bank to defer the first loan repayment until the end of year 2 (but still desires to make six equal installments at 8% interest). If the bank wishes to earn the same profit, what should be the annual installment, also known as deferred annuity?
+Suppose that BioGen wants to negotiate with the bank to defer the first loan repayment until the end of year 2 (but still desires to make six equal instalments at 8% interest). If the bank wishes to earn the same profit, what should be the annual instalment, also known as deferred annuity?
 
 the equal series fits well, except for the deferred payment. So, apply time shifting
 \[P' = \$250000 (F/P, 8\%, 1)]
-   #+begin_src python :noweb no-export :exports both :results output
+#+begin_src python :noweb no-export :exports both :results output
 <<imports>>
 i = 0.08
-N=6 # but tje first payment happens at year 2
-   #+end_src
-   TODO:
+P_prime = single_future(P=250000, i=i, N=1) # time shift initial
+print(P_prime)
+A_prime = eq_capital_recovery(P_prime, i=i, N=6)
+print(A_prime)
+#+end_src
+
+#+RESULTS:
+: 270000.0
+: 58405.15428183262
+
 *** Example 3.19 Millionaire life example
 Let us revisit the Millionaire Life example. Suppose that you had selected the annual payment option. Let’s see how your decision stands up against the $17 million cash prize option. If you could invest your money at 8% interest, what is the present worth of the 25 future payments at $1,000,000 per year for 25 years?
 
@@ -479,40 +505,112 @@ Let us revisit the Millionaire Life example. Suppose that you had selected the a
 A=1000000
 i = 0.08
 N=25
-return npf.pv(i, N, -A)
+return eq_present(A=A, i=i, N=N)
    #+end_src
 
    #+RESULTS:
    : 10674776.188588582
 
-   Turns out you're better off taking the $17 million up front
+   Turns out you're better off taking the $17 million up front, since 10 million is way less
 
 *** Example 3.20
 The maintenance costs for a truck during the first year will be $1,000 and are expected to increase at a rate of $250 per year. The firm wants to set up a maintenance account that earns 12% annual interest. How much does the firm have to deposit in the account now?
 
 View this as a equal (uniform) series with a linear gradient
 
-   #+begin_src python :noweb no-export :exports both :results value
+#+begin_src python :noweb no-export :exports both :results value
 <<imports>>
-A_1 = 1000
 G = 250
 i = 0.12
 N = 5
-   #+end_src
+return eq_present(A=1000, i=i, N=N) + linear_present(G=G, i=i, N=N) #5204
+#+end_src 
+
+#+RESULTS:
+: 5204.030210161696
 
 *** Example 3.21
 Find the equal amount for equal payment series to have the same money at the end as the geometric
-   #+begin_src python :noweb no-export :exports both :results value
+TODO: insert picture since there isn't much info 
+#+begin_src python :noweb no-export :exports both :results value
 <<imports>>
 A_1 = 1000
 G = 300
 i = 0.1
 N = 6
-   #+end_src
+
+return A_1 + linear_conversion(G=G, i=i, N=N)
+#+end_src
+
+#+RESULTS:
+: 1667.0671534719895
 
 
 *** Example 3.22
+#+begin_src python :noweb no-export :exports both :results output
+<<imports>>
+A_1 = 1200
+G = -200
+i = 0.1
+N = 5
+
+# find F = F1 - F2
+
+F1 = eq_future(A=A_1, i=i, N=N)
+print(F1)
+
+F2 = linear_present(G=G, i=i, N=N)
+# need to time shift present to future
+F2 = single_future(P=F2, i=i, N=N)
+print(F2)
+print(F1 + F2)
+#+end_src
+
+#+RESULTS:
+: 7326.120000000006
+: -2210.2000000000107
+: 5115.9199999999955
+
 *** Example 3.23
+Current System
+- Because of leaks, the compressor is expected to run 70% of the time that the plant will be in operation during the upcoming year.
+- This will require 259.238 kWh of electricity at a rate of $0.05/kWh. (Plant runs 250 days a year, 24 hours per day.)
+- With current air delivery system, the compressor run time will increase by 7% per year for the next five years
+
+New System
+- Can replace all of the old piping now at a cost of $28,570.
+- The compressor will still run the same number of days; however, it will run 23% less hours each day because of the reduced air pressure loss.
+- No annual increase in run time.
+- The interest rate is 12%.
+#+begin_src python :noweb no-export :exports both :results output
+<<imports>>
+g=0.07
+i=0.12
+N=5
+
+# find A1, P
+# A1 is power cost = % day operating * days operating per year
+hours = 250 * 24
+cost_per_hour = 0.05 # kWh
+power = 259.238
+A1 = 0.7 * hours * cost_per_hour * power
+print(f" A1: {A1}")
+
+current = geo_present(A1=A1, g=g, i=i, N=N)
+print(f"current: {current}")
+
+A1 = (1-0.23) * A1
+new = 28570 + geo_present(A1=A1, g=g, i=i, N=N)
+print(f"new: {new}")
+#+end_src
+
+#+RESULTS:
+:  A1: 54439.98
+: current: 222283.3177586273
+: new: 199728.154674143
+
+So, the replacement should be made now
+
 
 ** Types of cash flows
 [[pdf:./notes/lecture/markup/2021a L3 Economic Equivalence Single Cashflow (with notes).pdf::20][5 Types of Cash Flows Diagrams]]
@@ -523,7 +621,7 @@ TODO: insert formula sheet
     - computes the equivalent future value F, given a present value P
   - Present Worth Factor :: (P/A, i, N)
     \(P/F, i, N = \frac{1}{(1+i)^N}\)
-    - calculates the equivalent present value P given a future falue
+    - calculates the equivalent present value P given a future value
   - the interest rate \(i\) and the \(P/F\) factor are also referred to as the <<<discount rate>>> and <<<discounting factor>>>
 - Equal (uniform) series :: (uniform) a series of cash flows of equal amounts at regular intervals
 - Linear Gradient Series :: a series of cash flows increasing or decreasing by a fixed amount at regular intervals
@@ -625,7 +723,17 @@ Given an APR value of 15% compounded annually, semi-annually, monthly, daily, or
 2. semi annually m = 2 i_a = (1+15%/2)^2 - 1 = 15.563%
 3. monthly m=12 i_a = (1 + 15%/2)^12 = 16.0755%
 4. m = 365
-5. continuously I_a =
+5. continuously i_a = \(e^r - 1\)
+
+#+begin_src python :noweb no-export :results output
+<<imports>>
+for M in [1, 2, 12, 365, math.inf]:
+    ia = effective_rate_per_interest_period(M=M, r=0.15)
+    print(f"M: {M} i_a: {ia}")
+#+end_src
+
+#+RESULTS:
+   
 
 
 Takeaway: the more often you compound, the higher the interest rate
