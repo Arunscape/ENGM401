@@ -204,3 +204,6 @@ def interest_payment():
 
 def principal_repayment():
     pass
+
+def solve(expr, var: str):
+    pass

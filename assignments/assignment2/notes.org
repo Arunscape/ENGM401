@@ -1,0 +1,288 @@
+#+TITLE: Assignment 2
+
+#+name: imports
+
+#+property: header-args:python :noweb strip-export
+
+#+name: imports
+#+begin_src python
+from util import *
+#+end_src
+* Assignment 2 [3/6] [50%]
+** [X] 1
+- quarterly deposit
+- M=4
+- N=3
+- 12% compounded monthly
+
+  #+begin_src python :results output :file temp.py
+<<imports>>
+ia= effective_rate_per_interest_period(M=12, r=0.12, K=4)
+print(ia)
+  #+end_src
+
+  #+RESULTS:
+  : 0.030301000000000133
+ effective rate quarterly
+
+ times 3 years : 4 * 3 = 12
+
+ = 12 (F/A, ia, N)
+
+** [X] 2
+What equal series of payments must be paid into a sinking fund to accumulate the following amount?
+a) $21000 in 11 years at 6.45% compounded semiannually when payments are semiannual.
+b) $9000 in 10 years at 9.35% compounded quarterly when payments are quarterly.
+c) $24000 in 3 years at 6.55% compounded monthly when payments are monthly.
+
+   #+begin_src python :noweb no-export :results output
+<<imports>>
+print('a')
+ia = effective_rate_per_interest_period(M=2, K=2, r=0.0645)
+print(ia)
+N = 10 * 2
+A = eq_sinking(F=21000, i=ia, N=N)
+print(A)
+
+print('b')
+ia = effective_rate_per_interest_period(M=4, K=4, r=0.0935)
+N = 15 * 4
+A = eq_sinking(F=9000, i=ia, N=N)
+print(A)
+
+print('c')
+ia = effective_rate_per_interest_period(M=12, K=12, r=0.0655)
+N = 5 * 12
+A = eq_sinking(F=24000, i=ia, N=N)
+print(A)
+   #+end_src
+
+   #+RESULTS:
+   : a
+   : 0.03224999999999989
+   : 763.8058557519228
+   : b
+   : 70.1189264052991
+   : c
+   : 339.14983960499126
+
+** [X] 3
+   #+begin_src python :noweb no-export :results output
+from util import *
+a =0.06
+b=0.1
+c=0.08
+d=2000
+e=3000
+
+print('a')
+i1 = effective_rate_per_interest_period(M=4, K=1, r=a)
+print("i1", i1)
+N = 2
+P1 = eq_present(A=d, i=i1, N=2)
+print("P1", P1)
+
+i2 = effective_rate_per_interest_period(M=4, K=1, r=b)
+print("i2", i2)
+P2 = eq_present(A=d, i=i2, N=N) + single_present(F=(e-d), i=i2, N=1)
+print("p2 at t=2", P2)
+P2 = eq_present(A=d, i=i2, N=N) + single_present(F=(e-d), i=i2, N=1)
+print("p2 at t=2", P2)
+# time shift
+P2 = single_present(F=P2, i=i1, N=2)
+print("P2", P2) #TODO 3869
+
+i3 = effective_rate_per_interest_period(M=4, K=1, r=c)
+print("i3", i3)
+P3 = single_present(F=d, i=i3, N=1)
+print("p3 at year 4", P3)
+# time shift
+P3 = single_present(F=P3, i=i2, N=2)
+# again
+P3 = single_present(F=P3, i=i1, N=2)
+print("P3", P3) #1346.20
+
+
+P=P1 + P2 + P3
+print("a: P=$", P) #8875
+
+print('b')
+f = single_future(P=P, i=i1, N=2)
+f = single_future(P=f, i=i2, N=2)
+f = single_future(P=f, i=i3, N=1)
+print(f)
+
+print('c')
+fuck = lambda i, n: single_present(F=1, i=i, N=n)
+
+const = fuck(i1, 1) + fuck(i1, 2) +\
+        fuck(i2, 1) * fuck(i1, 2) + fuck(i2, 2) * fuck(i1, 2) +\
+        fuck(i3, 1) * fuck(i2, 2) * fuck(i1, 2 )
+# 2199
+print(const) # 4.035
+print(P/const)
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   a
+   i1 0.06136355062499965
+   P1 3659.7907081754215
+   i2 0.10381289062499954
+   p2 at t=2 4359.345076025451
+   p2 at t=2 4359.345076025451
+   P2 3869.8391164748527
+   i3 0.08243215999999998
+   p3 at year 4 1847.6908520530285
+   P3 1346.201429810246
+   a: P=$ 8875.83125446052
+   b
+   13186.483178392722
+   c
+   4.03580439472855
+   2199.2719136868654
+   #+end_example
+
+** [ ] 4 [fix a and b]
+
+total add on interest = P*i*N
+principal plus ass on interest = P(1+iN)
+Monthly instalments = P(1+iN)/ 12N
+
+add on interest is simple interest
+
+#+begin_src python :noweb no-export :results output
+from util import *
+
+M = 12
+K = 12
+r = 0.01
+A = 156.04
+N = 24
+P = 3000
+i = 0.01
+add_on = P * i * N
+print("add on interest", add_on)
+
+
+# A = P(A/P, i, N)
+i = sym.symbols("i")
+expr = eq_capital_recovery(P=P, i=i, N=N) - A
+print("expr", expr)
+_, i = sym.solveset(expr, i, domain=sym.S.Reals)
+print("i", i)
+print("nominal", 12 * i)
+print("effective annual", (1 + i) ** 12 - 1)
+
+# part c good
+f = eq_present(A=A, i=i, N=12)
+print(f)
+#+end_src
+
+#+RESULTS:
+: add on interest 720.0
+: expr 3000*i*(i + 1)**24/((i + 1)**24 - 1) - 156.04
+: i 0.0185612794877969
+: nominal 0.222735353853563
+: effective annual 0.246941128911554
+: 1664.85153464914
+
+** [ ] 5
+A = PPn + In
+In is the interest payment in period n
+PPn is the principal payment
+In is the interest payment in period n
+
+n = 30
+PPn = ?
+A = 186
+
+#+begin_src python :noweb no-export :results output
+<<imports>>
+P=15000
+i = effective_rate_per_interest_period(r=0.09, M=12, K=12)
+print("i", i)
+# after 6 months
+F = single_future(P=P, i=i, N=6)
+print("after 6 months", F)
+A = eq_capital_recovery(P=F, i=i, N=36)
+print("original A", A) #good
+
+print('b') # good
+p = eq_present(A=A, i=i, N=10)
+print(p)
+
+print('c') # wrong
+#find APR
+i = sym.symbols("i")
+expr = eq_capital_recovery(P=p, i=i, N=30) - 186
+print("expr", expr)
+_, i = sym.solveset(expr, i, domain=sym.S.Reals)
+print("apr", i*12)
+
+print(effective_rate_per_interest_period(r=(i*12), M=12, K=1))
+
+#+end_src
+
+#+RESULTS:
+: i 0.007500000000000062
+: after 6 months 15687.78352655248
+: original A 498.8673221713908
+: b
+: 4788.91655757971
+: c
+: expr 4788.91655757971*i*(i + 1)**30/((i + 1)**30 - 1) - 186
+: apr 0.121939734850447
+: 0.128991036856083
+
+** [ ] 6
+#+begin_src python :noweb no-export :results output
+from util import *
+
+# initial_purchase = 996.25
+coupon = 0.13  # semi annual
+maturity = 15
+par = 1100
+M = 2
+N = maturity * M
+
+coupon_rate = coupon / M * par
+print("A", coupon_rate)
+# year to maturity
+i = sym.symbols("i")
+
+# 2 years after
+N = N - 2 * M
+i = 0.04 / 2
+
+# expr = eq_present(A=coupon_rate, i=i, N=N) + single_present(F=par, i=i, N=N) - initial_purchase
+initial_purchase = eq_present(A=coupon_rate, i=i, N=N) + single_present(F=par, i=i, N=N)
+print("sell price: ", initial_purchase)
+
+i = 0.15 / 2
+initial_purchase = eq_present(A=coupon_rate, i=i, N=N) + single_present(F=par, i=i, N=N)
+print("sell price2: ", initial_purchase)
+# _, i = sym.solveset(expr, i, domain=sym.S.Reals)
+# print("semiannual i", i)
+
+ia = (1 + i) ** M - 1
+print("effective_annual interest yield", ia)
+
+
+# current yield
+frac = coupon_rate / initial_purchase
+nominal_yield_year = frac * M
+ia = (1 + frac) ** M - 1
+
+print("effective current yield", ia)
+
+print(coupon_rate / 783.58)  # somehow right
+#+end_src
+
+#+RESULTS:
+: A 71.5
+: sell price:  2095.9912700416758
+: sell price2:  975.7056702629909
+: effective_annual interest yield 0.1556249999999999
+: effective current yield 0.15193059306519419
+: 0.09124786237525204

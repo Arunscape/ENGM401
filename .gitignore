@@ -3,3 +3,5 @@ notes.pdf
 notes.tex
 *.jpg
 .auctex-auto/
+hugo/
+__pycache__/
