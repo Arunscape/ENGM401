@@ -1,0 +1,217 @@
+#+TITLE: Notes
+
+* 1
+#+begin_src python :results output
+from util import *
+
+# dealer
+P = 15458
+P = P * 0.9
+i1 = 0.115  # monthly
+N = 60
+
+#i1 = (1 + i1/12)**12 - 1
+#print(i1)
+A1 = eq_capital_recovery(P, i1, N)
+print("A", A1)
+
+P = eq_present(A1, i1, N=(N - 4))
+print(P)
+P = remaining_balance(A1, i1, N, n=4)
+print(P)
+
+# union
+i2 = 0.105
+#i2 = (1+i2/12)**12 -1
+A2 = eq_capital_recovery(P=P, i=i2, N=(N - 4))
+print("A2", A2)
+
+
+# dealer interest
+interest = (
+    interest_payment(A1, i1, N, 1)
+    + interest_payment(A1, i1, N, 2)
+    + interest_payment(A1, i1, N, 3)
+    + interest_payment(A1, i1, N, 4)
+)
+print("dealership", interest)
+
+interest += total_interest(A2, i2, N=(N - 4))
+print("total interest", interest)
+
+
+# example 4.13
+print(
+    "ex 4.13",
+    interest_payment(235.37, 0.01, N=24, n=6)
+        )
+print("b6",
+      remaining_balance(235.37, 0.01, 24, 6))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A 1602.2377205654159
+13901.123103012149
+13901.123103012149
+A2 1465.0827296847638
+dealership 6397.873985273814
+period 1, interest: 1459.6179258162756
+period 2, interest: 1459.0441214100842
+period 3, interest: 1458.4100675412433
+period 4, interest: 1457.7094380161734
+period 5, interest: 1456.9352423909713
+period 6, interest: 1456.0797562251232
+period 7, interest: 1455.134444011861
+period 8, interest: 1454.089874016206
+period 9, interest: 1452.9356241710077
+period 10, interest: 1451.660178092063
+period 11, interest: 1450.2508101748297
+period 12, interest: 1448.6934586262867
+period 13, interest: 1446.9725851651465
+period 14, interest: 1445.0710199905866
+period 15, interest: 1442.9697904726982
+period 16, interest: 1440.6479318554314
+period 17, interest: 1438.0822780833512
+period 18, interest: 1435.247230665203
+period 19, interest: 1432.114503268149
+period 20, interest: 1428.6528394944044
+period 21, interest: 1424.8277010244167
+period 22, interest: 1420.6009230150805
+period 23, interest: 1415.9303333147636
+period 24, interest: 1410.7693316959135
+period 25, interest: 1405.0664249070844
+period 26, interest: 1398.764712905428
+period 27, interest: 1391.8013211435978
+period 28, interest: 1384.1067732467754
+period 29, interest: 1375.6042978207865
+period 30, interest: 1366.2090624750688
+period 31, interest: 1355.8273274180508
+period 32, interest: 1344.3555101800464
+period 33, interest: 1331.6791521320508
+period 34, interest: 1317.6717764890159
+period 35, interest: 1302.1936264034625
+period 36, interest: 1285.090270558926
+period 37, interest: 1266.191062350713
+period 38, interest: 1245.3074372806377
+period 39, interest: 1222.2310315782045
+period 40, interest: 1196.7316032770157
+period 41, interest: 1168.554735004202
+period 42, interest: 1137.419295562743
+period 43, interest: 1103.0146349799309
+period 44, interest: 1064.9974850359235
+period 45, interest: 1022.9885343477954
+period 46, interest: 976.5686438374136
+period 47, interest: 925.2746648234419
+period 48, interest: 868.594818013003
+period 49, interest: 805.9635872874683
+period 50, interest: 736.7560773357521
+period 51, interest: 660.2817788391059
+period 52, interest: 575.7776790003119
+period 53, interest: 482.4006486784444
+period 54, interest: 379.21903017278095
+period 55, interest: 265.20334172402283
+period 56, interest: 139.21600598814496
+total interest 74541.38374460842
+ex 4.13 40.544856196877866
+b6 3859.6604758846647
+#+end_example
+
+
+* 2
+#+begin_src python :results output
+from util import *
+
+# x = YTM(1000, 0.12, 30, 2, 1000)
+# print(x)
+x = YTM(1000, 0.12, 30, 2, 1000)
+print(x)
+
+_, x = x
+x = sym.N(x)
+
+a = (1 + x) ** 2 - 1
+print("effective annual interest rate", a)
+
+i=0.09
+A = bond_payment(0.12, 1000, 2) # A always stays the same
+
+b = bond_market(A, i, 30-5, 2, 1000)
+print("B", b)
+
+
+
+x = YTM(b, i, 30-5, 2, 1000)
+print(x)
+
+_, x = x
+x = sym.N(x)
+
+c = (1 + x) ** 2 - 1
+print("effective annual interest rate", c)
+
+print("nominal", x * 2)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A 60
+N 60
+FiniteSet(-2, 3/50)
+effective annual interest rate 0.123600000000000
+B 671.1495129610757
+A 45
+N 50
+FiniteSet(-2.71373201712575, 0.0683250905196268)
+effective annual interest rate 0.141318499033769
+nominal 0.136650181039254
+#+end_example
+
+* 3
+#+begin_src python :results output
+from util import *
+M = 2
+years = 10
+coupon = 0.1
+
+A = 50
+N = years * M
+par = 1000
+
+x = bond_market(A, coupon, years-3, M, par)
+print(x)
+#+end_src
+
+#+RESULTS:
+: 631.6656271530398
+
+* 4
+#+begin_src python :results output
+from util import *
+i=0.15
+ans = 0
+
+ans -= 535 # now
+ans -= single_present(3431, i, 1) # investment first year
+ans -= single_present(4460, i, 2) # investment second year
+
+ans += eq_present(1647, i, 10-3) * single_future(1, i, 3) # savings years 3 to 10
+ans += linear_present(4781, i, 10-3) * single_future(1, i, 3) # new subscriptions
+ans -= linear_present(1582, i, 10-3) * single_future(1, i, 3) # expenses
+ans -= linear_present(1448, i, 10-3) * single_future(1, i, 3) # tax
+ans += single_future(1512, i, 10) # salvage
+print(ans)
+#+end_src
+
+#+RESULTS:
+: 36790.26168861123
+
+* 5
+#+begin_src python :results output
+from util import *
+
+print(8000 - (8200 - 1840))
+#+end_src
+
+#+RESULTS:
+: 1640
