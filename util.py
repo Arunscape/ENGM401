@@ -4,6 +4,7 @@ import sympy as sym
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+from typing import List
 
 
 class FormulaError(Exception):
@@ -310,3 +311,9 @@ def solve(expr, var):
 
 def current_yield(purchase_price, A, M):
     return A * M / purchase_price
+
+def net_present_worth(cash_flows: List[float], i: float):
+    sum: float = 0
+    for n, cf in enumerate(cash_flows):
+        sum += single_present(F=cf, i=i, N=n) 
+    return sum
