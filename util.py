@@ -57,6 +57,11 @@ def single_present(F=None, i=None, N=None):
 
     return F / (1 + i) ** N
 
+def time_shift(i: float, N: int):
+    if N > 0:
+        return single_future(1, i, N)
+    else:
+        return single_present(1, i, -N)
 
 def single_rate(F=None, P=None, N=None):
     fn = "find the discounting rate that makes a present amount equivalent to a future amount"
@@ -69,6 +74,16 @@ def single_rate(F=None, P=None, N=None):
 
     return npf.rate(N, 0, -P, F)
 
+def eq_rate(A=None, P=None, N=None):
+    fn = "find the discounting rate that makes equal payments equivalent to a furture amount"
+    if A is None:
+        raise FormulaError(fn, "A, or payment not provided")
+    if P is None:
+        raise FormulaError(fn, "P, or present amount not provided")
+    elif N is None:
+        raise FormulaError(fn, "N, or number of number of interest periods is missing")
+
+    return npf.rate(N, A, -P, 0)
 
 def single_periods(F=None, P=None, i=None):
     fn = "find the number of periods makes a present amount equivalent to a future amount"
@@ -81,7 +96,17 @@ def single_periods(F=None, P=None, i=None):
 
     return npf.nper(i, 0, -P, F)
 
+def eq_periods(A=None, P=None, i=None):
+    fn = "find the number of periods makes an equal payment equivalent to a future amount"
+    if A is None:
+        raise FormulaError(fn, "A, or payment not provided")
+    if P is None:
+        raise FormulaError(fn, "P, or present amount not provided")
+    elif i is None:
+        raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
 
+    return npf.nper(i, A, -P, 0)
+    
 def eq_future(A=None, i=None, N=None):
     fn = "equal payment series (F/A, i, N)"
     if A is None:
@@ -171,8 +196,16 @@ def geo_present(A1=None, g=None, i=None, N=None):
     return A1 * (1 - (1 + g) ** N * (1 + i) ** (-N)) / (i - g)
 
 
-def effective_rate_per_interest_period(r=None, M=None, K=None, C=None):
-    fn = """effective_rate_per_interest_period: i_a
+def effective_rate_per_payment_period(r=None, M=None, K=None, C=None):
+    """
+    effective_rate_per_payment_period:
+    r = APR or nominal interest rate per year
+    M = number of compounding periods per year, M=CK
+    C = number of compounding periods per payment period
+    K = number of payment periods per year
+    """
+
+    fn = """effective_rate_per_payment_period: i_a
     r = APR or nominal interest rate per year
     M = number of compounding periods per year, M=CK
     C = number of compounding periods per payment period
@@ -188,7 +221,7 @@ def effective_rate_per_interest_period(r=None, M=None, K=None, C=None):
         return math.exp(r / K) - 1
 
     if M == math.inf and K is None:
-        return math.exp(r / K) - 1
+        return math.exp(r) - 1
 
     if C is not None and K is not None and M is None:
         return (1 + r / (C * K)) ** C - 1
@@ -199,10 +232,16 @@ def effective_rate_per_interest_period(r=None, M=None, K=None, C=None):
     if C is not None and K is None and M is not None:
         return (1 + r / M) ** C - 1
 
-    if M is not None and K is not None and C is None and M is not None:
+    if M is not None and K is not None and C is None:
         return (1 + r / M) ** (M / K) - 1
 
     raise FormulaError(fn, "invalid combo of inputs")
+
+def effective_annual_interest_rate(r=None, M=None):
+    return effective_rate_per_payment_period(r=r, M=M)
+
+def ia_APR_per_month_compounded_monthly(r_over_m):
+    return (1 + r_over_m)**12 -1
 
 
 # amortized
@@ -223,7 +262,7 @@ def total_interest(A=None, i=None, N=None):
     sum = 0
     for n in range(1, N + 1):
         interest = interest_payment(A, i, N, n)
-        print(f"period {n}, interest: {interest}")
+        # print(f"period {n}, interest: {interest}")
         sum += interest
     return sum
 
@@ -244,18 +283,30 @@ def YTM(purchase_price, coupon, years, M, par):
     A = sym.Rational(coupon * par, M)
 
     i = sym.symbols("i")
-    print("A", A)
-    print("N", N)
 
     expr = eq_present(A=A, i=i, N=N) + single_present(F=par, i=i, N=N) - purchase_price
 
     return solve(expr, i)
 
 
-def bond_market(A, i, years, M, par):
+def YTM_NA(purchase_price, A, coupon, N, M, par):
+    # M=2 means semiannual
+
+    i = sym.symbols("i")
+    expr = eq_present(A=A, i=i, N=N) + single_present(F=par, i=i, N=N) - purchase_price
+    print("expr", expr)
+    return solve(expr, i)
+
+
+def bond_market(A, coupon, years, M, par):
     N = years * M
+    i = coupon / M
     return eq_present(A=A, i=i, N=N) + single_present(F=par, i=i, N=N)
 
 
 def solve(expr, var):
     return sym.solveset(expr, var, domain=sym.S.Reals)
+
+
+def current_yield(purchase_price, A, M):
+    return A * M / purchase_price

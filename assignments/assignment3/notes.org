@@ -8,10 +8,15 @@ from util import *
 P = 15458
 P = P * 0.9
 i1 = 0.115  # monthly
+
+# it's always APR/ compound period so r=0.115 and M=12
+i1 = i1 / 12
+
 N = 60
 
-#i1 = (1 + i1/12)**12 - 1
-#print(i1)
+# i1 = (1 + i1/12)**12 - 1
+# print(i1)
+
 A1 = eq_capital_recovery(P, i1, N)
 print("A", A1)
 
@@ -21,8 +26,8 @@ P = remaining_balance(A1, i1, N, n=4)
 print(P)
 
 # union
-i2 = 0.105
-#i2 = (1+i2/12)**12 -1
+i2 = 0.105 / 12
+# i2 = (1+i2/12)**12 -1
 A2 = eq_capital_recovery(P=P, i=i2, N=(N - 4))
 print("A2", A2)
 
@@ -41,78 +46,74 @@ print("total interest", interest)
 
 
 # example 4.13
-print(
-    "ex 4.13",
-    interest_payment(235.37, 0.01, N=24, n=6)
-        )
-print("b6",
-      remaining_balance(235.37, 0.01, 24, 6))
+print("ex 4.13", interest_payment(235.37, 0.01, N=24, n=6))
+print("b6", remaining_balance(235.37, 0.01, 24, 6))
 #+end_src
 
 #+RESULTS:
 #+begin_example
-A 1602.2377205654159
-13901.123103012149
-13901.123103012149
-A2 1465.0827296847638
-dealership 6397.873985273814
-period 1, interest: 1459.6179258162756
-period 2, interest: 1459.0441214100842
-period 3, interest: 1458.4100675412433
-period 4, interest: 1457.7094380161734
-period 5, interest: 1456.9352423909713
-period 6, interest: 1456.0797562251232
-period 7, interest: 1455.134444011861
-period 8, interest: 1454.089874016206
-period 9, interest: 1452.9356241710077
-period 10, interest: 1451.660178092063
-period 11, interest: 1450.2508101748297
-period 12, interest: 1448.6934586262867
-period 13, interest: 1446.9725851651465
-period 14, interest: 1445.0710199905866
-period 15, interest: 1442.9697904726982
-period 16, interest: 1440.6479318554314
-period 17, interest: 1438.0822780833512
-period 18, interest: 1435.247230665203
-period 19, interest: 1432.114503268149
-period 20, interest: 1428.6528394944044
-period 21, interest: 1424.8277010244167
-period 22, interest: 1420.6009230150805
-period 23, interest: 1415.9303333147636
-period 24, interest: 1410.7693316959135
-period 25, interest: 1405.0664249070844
-period 26, interest: 1398.764712905428
-period 27, interest: 1391.8013211435978
-period 28, interest: 1384.1067732467754
-period 29, interest: 1375.6042978207865
-period 30, interest: 1366.2090624750688
-period 31, interest: 1355.8273274180508
-period 32, interest: 1344.3555101800464
-period 33, interest: 1331.6791521320508
-period 34, interest: 1317.6717764890159
-period 35, interest: 1302.1936264034625
-period 36, interest: 1285.090270558926
-period 37, interest: 1266.191062350713
-period 38, interest: 1245.3074372806377
-period 39, interest: 1222.2310315782045
-period 40, interest: 1196.7316032770157
-period 41, interest: 1168.554735004202
-period 42, interest: 1137.419295562743
-period 43, interest: 1103.0146349799309
-period 44, interest: 1064.9974850359235
-period 45, interest: 1022.9885343477954
-period 46, interest: 976.5686438374136
-period 47, interest: 925.2746648234419
-period 48, interest: 868.594818013003
-period 49, interest: 805.9635872874683
-period 50, interest: 736.7560773357521
-period 51, interest: 660.2817788391059
-period 52, interest: 575.7776790003119
-period 53, interest: 482.4006486784444
-period 54, interest: 379.21903017278095
-period 55, interest: 265.20334172402283
-period 56, interest: 139.21600598814496
-total interest 74541.38374460842
+A 305.96555232067334
+13211.648400053644
+13211.648400053644
+A2 299.43525664802246
+dealership 523.310609336334
+period 1, interest: 115.60192350046937
+period 2, interest: 113.99338183542827
+period 3, interest: 112.37076543081805
+period 4, interest: 110.73395113266753
+period 5, interest: 109.08281470940814
+period 6, interest: 107.41723084244525
+period 7, interest: 105.73707311664647
+period 8, interest: 104.04221401074692
+period 9, interest: 102.33252488767074
+period 10, interest: 100.60787598476767
+period 11, interest: 98.86813640396417
+period 12, interest: 97.11317410182866
+period 13, interest: 95.34285587954946
+period 14, interest: 93.55704737282532
+period 15, interest: 91.75561304166732
+period 16, interest: 89.93841616011173
+period 17, interest: 88.1053188058425
+period 18, interest: 86.25618184972343
+period 19, interest: 84.39086494523829
+period 20, interest: 82.50922651783893
+period 21, interest: 80.6111237541998
+period 22, interest: 78.69641259137885
+period 23, interest: 76.76494770588319
+period 24, interest: 74.81658250263948
+period 25, interest: 72.85116910386736
+period 26, interest: 70.86855833785603
+period 27, interest: 68.86859972764206
+period 28, interest: 66.85114147958872
+period 29, interest: 64.81603047186492
+period 30, interest: 62.7631122428235
+period 31, interest: 60.692230979278044
+period 32, interest: 58.60322950467649
+period 33, interest: 56.4959492671722
+period 34, interest: 54.37023032758977
+period 35, interest: 52.225911347285965
+period 36, interest: 50.06282957590452
+period 37, interest: 47.880820839023485
+period 38, interest: 45.67971952569471
+period 39, interest: 43.45935857587434
+period 40, interest: 41.21956946774302
+period 41, interest: 38.96018220491557
+period 42, interest: 36.6810253035384
+period 43, interest: 34.38192577927417
+period 44, interest: 32.062709134172586
+period 45, interest: 29.723199343426415
+period 46, interest: 27.36321884201115
+period 47, interest: 24.98258851120855
+period 48, interest: 22.58112766501142
+period 49, interest: 20.158654036410052
+period 50, interest: 17.714983763558436
+period 51, interest: 15.249931375819413
+period 52, interest: 12.76330977968758
+period 53, interest: 10.25493024458966
+period 54, interest: 7.724602388559593
+period 55, interest: 5.172134163789328
+period 56, interest: 2.5973318420522498
+total interest 4080.036581572004
 ex 4.13 40.544856196877866
 b6 3859.6604758846647
 #+end_example
@@ -133,39 +134,34 @@ x = sym.N(x)
 a = (1 + x) ** 2 - 1
 print("effective annual interest rate", a)
 
-i=0.09
-A = bond_payment(0.12, 1000, 2) # A always stays the same
+coupon = 0.09
+A = bond_payment(0.12, 1000, 2)  # A always stays the same
 
-b = bond_market(A, i, 30-5, 2, 1000)
+b = bond_market(A, coupon, 30 - 5, 2, 1000)
 print("B", b)
 
 
+x = YTM_NA(922.38, A, 0.09, 49, 2, 1000)
 
-x = YTM(b, i, 30-5, 2, 1000)
-print(x)
-
-_, x = x
+_, _, x = x
 x = sym.N(x)
+print(x)
 
 c = (1 + x) ** 2 - 1
 print("effective annual interest rate", c)
 
-print("nominal", x * 2)
+# how much you make in a year
+print("nominal", current_yield(922.38,A, 2))
 #+end_src
 
 #+RESULTS:
-#+begin_example
-A 60
-N 60
-FiniteSet(-2, 3/50)
-effective annual interest rate 0.123600000000000
-B 671.1495129610757
-A 45
-N 50
-FiniteSet(-2.71373201712575, 0.0683250905196268)
-effective annual interest rate 0.141318499033769
-nominal 0.136650181039254
-#+end_example
+: FiniteSet(-2, 3/50)
+: effective annual interest rate 0.123600000000000
+: B 1296.430116678116
+: expr -922.38 + 1000/(i + 1)**49 + (60.0*(i + 1)**49 - 60.0)/(i*(i + 1)**49)
+: 0.0653083871411682
+: effective annual interest rate 0.134881959713317
+: nominal 0.13009822415924022
 
 * 3
 #+begin_src python :results output
@@ -178,12 +174,14 @@ A = 50
 N = years * M
 par = 1000
 
-x = bond_market(A, coupon, years-3, M, par)
+i = 0.06/2
+
+x = bond_market(A, i, years-3, M, par)
 print(x)
 #+end_src
 
 #+RESULTS:
-: 631.6656271530398
+: 1225.9214627875874
 
 * 4
 #+begin_src python :results output
@@ -195,16 +193,22 @@ ans -= 535 # now
 ans -= single_present(3431, i, 1) # investment first year
 ans -= single_present(4460, i, 2) # investment second year
 
-ans += eq_present(1647, i, 10-3) * single_future(1, i, 3) # savings years 3 to 10
-ans += linear_present(4781, i, 10-3) * single_future(1, i, 3) # new subscriptions
-ans -= linear_present(1582, i, 10-3) * single_future(1, i, 3) # expenses
-ans -= linear_present(1448, i, 10-3) * single_future(1, i, 3) # tax
-ans += single_future(1512, i, 10) # salvage
+ans += eq_present(1647, i, 10-2) * single_present(1, i, 2) # savings years 3 to 10
+ans += eq_present(4781, i, 10-2) * single_present(1, i, 2) # new subscriptions
+ans -= eq_present(1582, i, 10-2) * single_present(1, i, 2) # expenses
+ans -= eq_present(1448, i, 10-2) * single_present(1, i, 2) # tax
+
+
+print(eq_present(1647+4781-1582-1448, i, 8) * single_present(1, i , 2))
+ans += single_present(1512, i, 10) # salvage
 print(ans)
+
+#5012.48
 #+end_src
 
 #+RESULTS:
-: 36790.26168861123
+: 11529.617000482536
+: 5012.481259125566
 
 * 5
 #+begin_src python :results output
@@ -215,3 +219,10 @@ print(8000 - (8200 - 1840))
 
 #+RESULTS:
 : 1640
+
+-10000
+1000
+5000
+8000
+6000
+2999.6
