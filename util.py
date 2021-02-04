@@ -312,8 +312,63 @@ def solve(expr, var):
 def current_yield(purchase_price, A, M):
     return A * M / purchase_price
 
-def net_present_worth(cash_flows: List[float], i: float):
-    sum: float = 0
+# def net_present_worth(cash_flows: List[float], i: float):
+#     sum: float = 0
+#     for n, cf in enumerate(cash_flows):
+#         sum += single_present(F=cf, i=i, N=n) 
+#     return sum
+
+def net_present_worth(rate, cash_flows):
+    return npf.npv(rate, cash_flows)
+
+def project_balance(i: float, project_balance: List[float]):
+    An = []
+    cost = []
+    difference = []
+
+    for n, pb in enumerate(project_balance):
+        diff = pb
+        c = 0
+        an = diff
+        if n > 0:
+            diff -= project_balance[n-1]
+            c = i * project_balance[n-1]
+            an = diff - c
+        difference.append(diff)
+        cost.append(c)
+        An.append(an)
+
+    d = {
+        'An': An,
+        'interest': cost,
+        'project balance': project_balance,
+        'difference': difference
+    }
+    print("net present worth", npf.npv(i, An))
+    return pd.DataFrame(data=d)
+            
+def cash_flows(i: float, cash_flows: List[float]):
+    project_balance = []
+    cost = []
+    difference = []
+
     for n, cf in enumerate(cash_flows):
-        sum += single_present(F=cf, i=i, N=n) 
-    return sum
+        pb = cf
+        diff = cf
+        c = 0
+        if n > 0:
+            c = i * project_balance[n-1]
+            pb = project_balance[n-1] + cf + c
+            diff = pb - project_balance[n-1]
+        difference.append(diff)
+        cost.append(c)
+        project_balance.append(pb)
+
+    d = {
+        'An': cash_flows,
+        'interest': cost,
+        'project balance': project_balance,
+        'difference': difference
+    }
+    print("net present worth", npf.npv(i, cash_flows))
+    return pd.DataFrame(data=d)
