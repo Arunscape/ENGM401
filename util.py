@@ -105,8 +105,8 @@ def eq_periods(A=None, P=None, i=None):
     elif i is None:
         raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
 
-    return npf.nper(i, A, -P, 0)
-    
+    return npf.nper(i, A, P, 0)
+
 def eq_future(A=None, i=None, N=None):
     fn = "equal payment series (F/A, i, N)"
     if A is None:
