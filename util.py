@@ -58,11 +58,13 @@ def single_present(F=None, i=None, N=None):
 
     return F / (1 + i) ** N
 
+
 def time_shift(i: float, N: int):
     if N > 0:
         return single_future(1, i, N)
     else:
         return single_present(1, i, -N)
+
 
 def single_rate(F=None, P=None, N=None):
     fn = "find the discounting rate that makes a present amount equivalent to a future amount"
@@ -75,6 +77,7 @@ def single_rate(F=None, P=None, N=None):
 
     return npf.rate(N, 0, -P, F)
 
+
 def eq_rate(A=None, P=None, N=None):
     fn = "find the discounting rate that makes equal payments equivalent to a furture amount"
     if A is None:
@@ -85,6 +88,7 @@ def eq_rate(A=None, P=None, N=None):
         raise FormulaError(fn, "N, or number of number of interest periods is missing")
 
     return npf.rate(N, A, -P, 0)
+
 
 def single_periods(F=None, P=None, i=None):
     fn = "find the number of periods makes a present amount equivalent to a future amount"
@@ -97,6 +101,7 @@ def single_periods(F=None, P=None, i=None):
 
     return npf.nper(i, 0, -P, F)
 
+
 def eq_periods(A=None, P=None, i=None):
     fn = "find the number of periods makes an equal payment equivalent to a future amount"
     if A is None:
@@ -107,6 +112,7 @@ def eq_periods(A=None, P=None, i=None):
         raise FormulaError(fn, "i, or interest not provided: 0<=i<=1")
 
     return npf.nper(i, A, P, 0)
+
 
 def eq_future(A=None, i=None, N=None):
     fn = "equal payment series (F/A, i, N)"
@@ -238,11 +244,17 @@ def effective_rate_per_payment_period(r=None, M=None, K=None, C=None):
 
     raise FormulaError(fn, "invalid combo of inputs")
 
+
 def effective_annual_interest_rate(r=None, M=None):
     return effective_rate_per_payment_period(r=r, M=M)
 
+
 def ia_APR_per_month_compounded_monthly(r_over_m):
-    return (1 + r_over_m)**12 -1
+    return (1 + r_over_m) ** 12 - 1
+
+
+def ia(r_over_m, M=2):
+    return (1 + r_over_m) ** M - 1
 
 
 # amortized
@@ -250,13 +262,13 @@ def remaining_balance(A=None, i=None, N=None, n=None):
     return eq_present(A, i, N=(N - n))
 
 
-def amortized_payment():
-    pass
-
-
 def interest_payment(A=None, i=None, N=None, n=None):
     # return remaining_balance(A, i, N, n=(n - 1)) * i
     return eq_present(A, i, N - n + 1) * i
+
+
+def principal_payment(P=None, i=None, N=None, n=None):
+    return npf.ppmt(i, n, N, -P)
 
 
 def total_interest(A=None, i=None, N=None):
@@ -268,15 +280,15 @@ def total_interest(A=None, i=None, N=None):
     return sum
 
 
-def principal_repayment(PP, I):
-    pass
+def add_on_interest(P, i, N):
+    return P * i * N
 
 
-def bond_payment(coupon, par, M):
+def bond_payment(coupon=None, par=None, M=2):
     return coupon * par / M
 
 
-def YTM(purchase_price, coupon, years, M, par):
+def YTM(purchase_price=None, coupon=None, years=None, par=None, M=2):
     # M=2 means semiannual
     N = years * M  # number of payment periods
 
@@ -286,40 +298,50 @@ def YTM(purchase_price, coupon, years, M, par):
     i = sym.symbols("i")
 
     expr = eq_present(A=A, i=i, N=N) + single_present(F=par, i=i, N=N) - purchase_price
-
+    print("note: this is probably the semiannual rate if M=2 i.e. you now have r/m")
+    print("use ia(r_over_m, M=2) to get annual interest rate")
+    print("multiply it by 2 to get the nominal annual rate")
     return solve(expr, i)
 
 
-def YTM_NA(purchase_price, A, coupon, N, M, par):
+def YTM_NA(purchase_price=None, A=None, coupon=None, N=None, par=None, M=2):
     # M=2 means semiannual
 
     i = sym.symbols("i")
     expr = eq_present(A=A, i=i, N=N) + single_present(F=par, i=i, N=N) - purchase_price
     print("expr", expr)
+    print("note: this is probably the semiannual rate if M=2 i.e. you now have r/m")
+    print("use ia(r_over_m, M=2) to get annual interest rate")
+    print("multiply it by 2 to get the nominal annual rate")
     return solve(expr, i)
 
 
-def bond_market(A, coupon, years, M, par):
+def bond_market(A=None, coupon=None, years=None, par=None, M=2):
     N = years * M
     i = coupon / M
     return eq_present(A=A, i=i, N=N) + single_present(F=par, i=i, N=N)
+
+
+def bond_current_yield(A=None, market=None):
+    print("this is the semiannual yield")
+    print("multiply by M=2 to get the annual current yield")
+    return A / market
 
 
 def solve(expr, var):
     return sym.solveset(expr, var, domain=sym.S.Reals)
 
 
-def current_yield(purchase_price, A, M):
-    return A * M / purchase_price
-
 # def net_present_worth(cash_flows: List[float], i: float):
 #     sum: float = 0
 #     for n, cf in enumerate(cash_flows):
-#         sum += single_present(F=cf, i=i, N=n) 
+#         sum += single_present(F=cf, i=i, N=n)
 #     return sum
+
 
 def net_present_worth(rate, cash_flows):
     return npf.npv(rate, cash_flows)
+
 
 def project_balance(i: float, project_balance: List[float]):
     An = []
@@ -331,22 +353,23 @@ def project_balance(i: float, project_balance: List[float]):
         c = 0
         an = diff
         if n > 0:
-            diff -= project_balance[n-1]
-            c = i * project_balance[n-1]
+            diff -= project_balance[n - 1]
+            c = i * project_balance[n - 1]
             an = diff - c
         difference.append(diff)
         cost.append(c)
         An.append(an)
 
     d = {
-        'An': An,
-        'interest': cost,
-        'project balance': project_balance,
-        'difference': difference
+        "An": An,
+        "interest": cost,
+        "project balance": project_balance,
+        "difference": difference,
     }
     print("net present worth", npf.npv(i, An))
     return pd.DataFrame(data=d)
-            
+
+
 def cash_flows(i: float, cash_flows: List[float]):
     project_balance = []
     cost = []
@@ -357,18 +380,18 @@ def cash_flows(i: float, cash_flows: List[float]):
         diff = cf
         c = 0
         if n > 0:
-            c = i * project_balance[n-1]
-            pb = project_balance[n-1] + cf + c
-            diff = pb - project_balance[n-1]
+            c = i * project_balance[n - 1]
+            pb = project_balance[n - 1] + cf + c
+            diff = pb - project_balance[n - 1]
         difference.append(diff)
         cost.append(c)
         project_balance.append(pb)
 
     d = {
-        'An': cash_flows,
-        'interest': cost,
-        'project balance': project_balance,
-        'difference': difference
+        "An": cash_flows,
+        "interest": cost,
+        "project balance": project_balance,
+        "difference": difference,
     }
     print("net present worth", npf.npv(i, cash_flows))
     return pd.DataFrame(data=d)
