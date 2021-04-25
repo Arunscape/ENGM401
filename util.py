@@ -395,3 +395,15 @@ def cash_flows(i: float, cash_flows: List[float]):
     }
     print("net present worth", npf.npv(i, cash_flows))
     return pd.DataFrame(data=d)
+
+def equivalent_annual_worth(i: float, cash_flows: List[float]):
+    # start at n=0
+    sum = net_present_worth(i, cash_flows)
+    return eq_capital_recovery(sum, i, len(cash_flows)-1)
+
+
+def capital_cost(P, S, i, N):
+    return eq_capital_recovery(P-S, i, N) + i*S
+
+def capitalized_equivalent(A, i):
+    return A/i
