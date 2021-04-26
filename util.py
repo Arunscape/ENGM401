@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 from typing import List
+from matplotlib.ticker import MaxNLocator
 
 
 class FormulaError(Exception):
@@ -375,6 +376,10 @@ def cash_flows(i: float, cash_flows: List[float]):
     cost = []
     difference = []
 
+    if i is None:
+        i = rate_of_return(cash_flows)
+        print(f"rate of return is {i}")
+
     for n, cf in enumerate(cash_flows):
         pb = cf
         diff = cf
@@ -394,6 +399,7 @@ def cash_flows(i: float, cash_flows: List[float]):
         "difference": difference,
     }
     print("net present worth", npf.npv(i, cash_flows))
+    print("equivalent annual worth", equivalent_annual_worth(i, cash_flows))
     return pd.DataFrame(data=d)
 
 def equivalent_annual_worth(i: float, cash_flows: List[float]):
@@ -401,9 +407,56 @@ def equivalent_annual_worth(i: float, cash_flows: List[float]):
     sum = net_present_worth(i, cash_flows)
     return eq_capital_recovery(sum, i, len(cash_flows)-1)
 
-
-def capital_cost(P, S, i, N):
-    return eq_capital_recovery(P-S, i, N) + i*S
-
 def capitalized_equivalent(A, i):
     return A/i
+
+def rate_of_return(cash_flows):
+    return npf.irr(cash_flows)
+
+def capital_recovery_cost(P, i, N, Salvage):
+    return eq_capital_recovery(P-Salvage, i, N) + i*Salvage
+
+def depreciation(P, Salvage, Lifetime):   
+    B = P
+    S = Salvage
+    N = Lifetime
+                                                
+    dt = lambda t: (B - S) / N # deprecation in year t
+    bv = lambda t: (B - dt(t)*t) # total depreciation up to year t
+    declinesstraight = [0] + [round(dt(x+1), 2) for x in range(N)]                 
+    valuesstraight = [P] + [round(bv(x+1), 2) for x in range(N)]                
+                                           
+                                                
+                                                
+    calc_d = lambda: ((B - S) / N) / (B - S) * 2               
+    D = calc_d()                                                     
+    dt = lambda t: D * B * (1-D)**(t-1) # deprecation in year t      
+    bv = lambda t: B * (1 - D) ** t # total depreciation up to year t
+    declinesddb = [0] + [round(dt(x+1), 2) for x in range(N)]                 
+    valuesddb = [P] + [round(bv(x+1), 2) for x in range(N)]  
+
+    d = {
+        "Book value Straightline": valuesstraight,
+        "Book value DDB": valuesddb,
+        "Declines Straightline": declinesstraight,
+        "Declines Double Declining": declinesddb,
+    }
+    print("NOTE: if the book value is below the salvage value, it should instead be the salvage value. This also affects the depreciation amount")
+
+    df = pd.DataFrame(data=d)
+
+    ax = plt.gca()
+    df.plot(kind='line', y="Book value Straightline", ax=ax)
+    df.plot(kind='line', y="Book value DDB", ax=ax)
+    plt.axhline(y=Salvage, label="Salvage Value")
+    plt.legend()
+    xa = ax.get_xaxis()
+    xa.set_major_locator(MaxNLocator(integer=True))
+    
+    plt.show()
+    
+
+    return df
+ 
+def depreciation_units_of_production_rate(P, Salvage, units):
+    return (P - Salvage)/ units
