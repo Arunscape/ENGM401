@@ -405,7 +405,9 @@ def cash_flows(i: float, cash_flows: List[float]):
 def equivalent_annual_worth(i: float, cash_flows: List[float]):
     # start at n=0
     sum = net_present_worth(i, cash_flows)
-    return eq_capital_recovery(sum, i, len(cash_flows)-1)
+    A = eq_capital_recovery(sum, i, len(cash_flows)-1)
+    print("equivalent annual cost, capitalized equivalent worth")
+    return (A, A/i)
 
 def capitalized_equivalent(A, i):
     return A/i
@@ -415,6 +417,13 @@ def rate_of_return(cash_flows):
 
 def capital_recovery_cost(P, i, N, Salvage):
     return eq_capital_recovery(P-Salvage, i, N) + i*Salvage
+
+
+def declining_balance(P, d, n):
+    dep = d * P * (1-d) ** (n-1)
+    book = P * (1 - d) ** n 
+    print("(depreciation, book value)")
+    return (dep, book)
 
 def depreciation(P, Salvage, Lifetime):   
     B = P
@@ -460,3 +469,79 @@ def depreciation(P, Salvage, Lifetime):
  
 def depreciation_units_of_production_rate(P, Salvage, units):
     return (P - Salvage)/ units
+
+
+def break_even_change_selling(Fixed_cost, Variable_cost_ratio, change):
+    return Fixed_cost / (1- Variable_cost_ratio/(1 + change))
+
+# cost includes installation and transportation
+def CCA_with_50(P, d, year):
+    if year == 1:
+        return P * d/2
+
+    return P * d * (1 - d/2) * (1 - d) ** (year - 2)
+
+# undepreciated capital cost allowance i.e. original buying price - cca
+def UCC_with_50(P, d, year):
+    return P * (1 - d/2) * (1-d) ** (year - 1)
+
+# after 1984 assume 4% cca
+# land does not depreciate
+def CCA_without_50(P, d, year):
+    if year == 1:
+        return P * d
+    return P*d * (1-d) ** (year-1)
+
+def UCC_without_50(P, d, year):
+    return P * (1-d) ** year
+
+def net_proceeds_with_50(P, d, year, tax_rate, sell_price):
+    value = UCC_with_50(P, d, year)
+    print(f"value at year {year}: {value}")
+    taxable_loss = value - sell_price
+    print(f"taxable loss: {taxable_loss}")
+    tax_credit = tax_rate * taxable_loss
+    print(f"tax credit: {tax_credit}")
+    net_proceeds = sell_price + tax_credit
+    print(f"net proceeds: {net_proceeds}")
+    return net_proceeds
+
+def tax(income, lower_provincial=None, higher_provincial=None, lower_federal=None, higher_federal=None):
+    sum = 0
+
+    if lower_provincial is not None and higher_provincial is not None:
+        sum += min(400000, income) * lower_provincial + max((income - 400000), 0) * higher_provincial
+
+    if lower_federal is not None and higher_federal is not None:
+        sum += min(400000, income) * lower_federal + max((income - 400000), 0) * higher_federal
+
+    print(f"after tax income: {income - sum}")
+    return sum
+
+def disposal_tax_effect(P, d, year, sell_price, tax):
+    ucc = UCC_with_50(P, d, year)
+    gain_in_sale = sell_price - ucc
+
+    disposal_tax = tax * gain_in_sale
+
+    return disposal_tax
+
+
+def SOYD_depreciation(P, N, n, S):
+    soyd = sum(range(1, N+1))
+    return (N-n + 1)/soyd * (P-S)
+    
+def UP_depreciation(Units, Total, P, S):
+    return Units/Total * (P-S)
+
+# cost basis is the total cost to get the asset into usable condition
+# includes initial cost and freight and installation
+# if it's a trade in,
+# book value = cost basis - total accumulated depreciation
+# salvage value must be considered
+# subtract the salvage - book value (unrecognized gains)
+# also subtract trade in allowance
+
+# declining balance
+# d = 1/N * multiplier
+
